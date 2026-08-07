@@ -13,3 +13,38 @@ func _ready() -> void:
 	# Initial tests
 	soundscape_system.start_spirit_puzzle()
 	ecology_system.update_vitality(0.2)
+
+	var tel = get_node_or_null("/root/TelemetryService")
+	if tel:
+		tel.enable_telemetry(true)
+		tel.track_onboarding_completed()
+
+	var spike_scene = load("res://spike/breathing_spike.tscn")
+	if spike_scene:
+		var canvas = CanvasLayer.new()
+		var spike_node = spike_scene.instantiate()
+		canvas.add_child(spike_node)
+		add_child(canvas)
+		if tel:
+			tel.track_breathing_engaged()
+
+	var cta_canvas = CanvasLayer.new()
+	cta_canvas.layer = 100
+	var cta_box = HBoxContainer.new()
+	cta_box.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	cta_box.offset_bottom = -20
+	cta_box.offset_right = -20
+	cta_box.alignment = BoxContainer.ALIGNMENT_END
+
+	var wishlist_btn = Button.new()
+	wishlist_btn.text = "Wishlist on Steam"
+	wishlist_btn.pressed.connect(func(): OS.shell_open("steam://store/APPID"))
+
+	var itch_btn = Button.new()
+	itch_btn.text = "Demo on itch.io"
+	itch_btn.pressed.connect(func(): OS.shell_open("https://slashman413.itch.io/komorebi"))
+
+	cta_box.add_child(wishlist_btn)
+	cta_box.add_child(itch_btn)
+	cta_canvas.add_child(cta_box)
+	add_child(cta_canvas)

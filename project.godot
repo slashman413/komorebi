@@ -8,13 +8,15 @@ config_version=5
 
 config/name="Komorebi"
 config/description="4-7-8 breathing companion. Increment 0 de-risks haptic/audio/visual sync."
-run/main_scene="res://spike/breathing_spike.tscn"
+run/main_scene="res://src/level/vertical_slice.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
+run/max_fps=60
 
 [autoload]
 
 ; Load order matters: leaf services first, GameDirector last so it can wire them.
+TelemetryService="*res://autoload/telemetry_service.gd"
 SaveService="*res://autoload/save_service.gd"
 SteamService="*res://autoload/steam_service.gd"
 InputRouter="*res://autoload/input_router.gd"
@@ -37,6 +39,7 @@ window/size/viewport_width=1280
 window/size/viewport_height=800
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
+window/vsync/vsync_mode=1
 
 [input_devices]
 
