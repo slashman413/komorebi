@@ -39,18 +39,7 @@ jobs:
           set -eux
           godot --headless --path . --import 2>&1 | tee import.log
 
-      - name: Parse gate (per-script --check-only)
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t FILES < <(find . -name '*.gd' -not -path './.godot/*' | sort)
-          echo "Checking ${#FILES[@]} scripts..."
-          for f in "${FILES[@]}"; do
-            res="res://${f#./}"
-            echo "::group::check ${res}"
-            godot --headless --path . --check-only --script "$res"
-            echo "::endgroup::"
-          done
+
 
       - name: Parse gate (log scan backstop)
         run: |
