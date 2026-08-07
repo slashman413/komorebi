@@ -1,0 +1,51 @@
+; Engine configuration file.
+; Project Komorebi — Increment 0 (Skeleton + Breathing Spike)
+; Target: Godot 4.3+, Steam Deck (native 1280x800 @ 60 FPS).
+
+config_version=5
+
+[application]
+
+config/name="Komorebi"
+config/description="4-7-8 breathing companion. Increment 0 de-risks haptic/audio/visual sync."
+run/main_scene="res://spike/breathing_spike.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+; Load order matters: leaf services first, GameDirector last so it can wire them.
+SaveService="*res://autoload/save_service.gd"
+SteamService="*res://autoload/steam_service.gd"
+InputRouter="*res://autoload/input_router.gd"
+GameDirector="*res://autoload/game_director.gd"
+
+[debug]
+
+; Surface type/parse problems at import time so the CI parse gate can catch them.
+gdscript/warnings/enable=true
+gdscript/warnings/untyped_declaration=1
+gdscript/warnings/unsafe_property_access=1
+gdscript/warnings/unsafe_method_access=1
+gdscript/warnings/unsafe_cast=1
+gdscript/warnings/return_value_discarded=0
+
+[display]
+
+; Steam Deck native panel resolution.
+window/size/viewport_width=1280
+window/size/viewport_height=800
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[input_devices]
+
+; Keep haptics available on the Deck's built-in controller.
+pointing/emulate_touch_from_mouse=true
+
+[rendering]
+
+; Compatibility renderer: safe for the Steam Deck APU and headless CI export.
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.086, 0.098, 0.129, 1)

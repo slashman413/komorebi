@@ -1,0 +1,12 @@
+{
+	"schema_version": 1,
+	"settings": {
+		"haptics_enabled": true,
+		"audio_enabled": true,
+		"master_volume_db": -3.0
+	},
+	"progress": {
+		"sessions_completed": 7,
+		"total_breath_seconds": 133.0
+	}
+}

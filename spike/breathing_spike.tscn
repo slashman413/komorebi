@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://spike/breathing_spike.gd" id="1"]
+[ext_resource type="Script" path="res://spike/breath_clock.gd" id="2"]
+[ext_resource type="Script" path="res://spike/breath_visual.gd" id="3"]
+[ext_resource type="Script" path="res://spike/breath_audio.gd" id="4"]
+[ext_resource type="Script" path="res://spike/haptic_probe.gd" id="5"]
+[ext_resource type="Script" path="res://spike/drift_overlay.gd" id="6"]
+
+[node name="BreathingSpike" type="Node2D"]
+script = ExtResource("1")
+
+[node name="BreathClock" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="BreathVisual" type="Node2D" parent="."]
+script = ExtResource("3")
+clock_path = NodePath("../BreathClock")
+
+[node name="BreathAudio" type="AudioStreamPlayer" parent="."]
+script = ExtResource("4")
+clock_path = NodePath("../BreathClock")
+
+[node name="HapticProbe" type="Node" parent="."]
+script = ExtResource("5")
+clock_path = NodePath("../BreathClock")
+
+[node name="DriftOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("6")
+clock_path = NodePath("../BreathClock")
+haptic_path = NodePath("../HapticProbe")
+
+[node name="Panel" type="Panel" parent="DriftOverlay"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 560.0
+offset_bottom = 232.0
+
+[node name="Label" type="Label" parent="DriftOverlay/Panel"]
+offset_left = 14.0
+offset_top = 10.0
+offset_right = 544.0
+offset_bottom = 216.0
+theme_override_font_sizes/font_size = 15
+text = "KOMOREBI · Breathing Spike"

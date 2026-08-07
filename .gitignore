@@ -1,0 +1,12 @@
+# Godot 4+ specific
+.godot/
+/android/
+
+# Exported builds / CI artifacts
+build/
+export/
+*.tmp
+
+# OS noise
+.DS_Store
+Thumbs.db

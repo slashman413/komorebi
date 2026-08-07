@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.3"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Gate 1: import the project, prove every script parses, run headless tests.
+  # Nothing downstream runs unless this is green.
+  # ---------------------------------------------------------------------------
+  import-and-test:
+    name: Import + Parse Gate + Tests
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Provision export templates
+        run: |
+          set -eux
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          # barichello image ships templates under /root; move them where this
+          # job's HOME expects them (no-op/harmless if already colocated).
+          if [ -d "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" ]; then
+            cp -r "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
+                  "$HOME/.local/share/godot/export_templates/" || true
+          fi
+          ls -la "$HOME/.local/share/godot/export_templates/" || true
+
+      - name: Import project (populates .godot/, compiles scripts)
+        run: |
+          set -eux
+          godot --headless --path . --import 2>&1 | tee import.log
+
+      - name: Parse gate (per-script --check-only)
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < <(find . -name '*.gd' -not -path './.godot/*' | sort)
+          echo "Checking ${#FILES[@]} scripts..."
+          for f in "${FILES[@]}"; do
+            res="res://${f#./}"
+            echo "::group::check ${res}"
+            godot --headless --path . --check-only --script "$res"
+            echo "::endgroup::"
+          done
+
+      - name: Parse gate (log scan backstop)
+        run: |
+          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script" import.log; then
+            echo "::error::Script/parse errors found during import"
+            grep -E "SCRIPT ERROR|Parse Error|Failed to load script" import.log || true
+            exit 1
+          fi
+          echo "No parse errors in import log."
+
+      - name: Headless tests (exit code gates the job)
+        run: |
+          set -eux
+          godot --headless --path . --script res://tests/run_tests.gd
+
+  # ---------------------------------------------------------------------------
+  # Gate 2: export Windows + Linux and upload the binaries as artifacts.
+  # ---------------------------------------------------------------------------
+  export:
+    name: Export ${{ matrix.name }}
+    needs: import-and-test
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            preset: "Linux"
+            outdir: linux
+            binary: komorebi.x86_64
+          - name: Windows
+            preset: "Windows Desktop"
+            outdir: windows
+            binary: komorebi.exe
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Provision export templates
+        run: |
+          set -eux
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          if [ -d "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" ]; then
+            cp -r "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
+                  "$HOME/.local/share/godot/export_templates/" || true
+          fi
+          test -d "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
+            || { echo "::error::export templates for ${GODOT_VERSION} not found"; exit 1; }
+
+      - name: Import project
+        run: godot --headless --path . --import
+
+      - name: Export ${{ matrix.name }}
+        run: |
+          set -eux
+          mkdir -p "build/${{ matrix.outdir }}"
+          godot --headless --path . \
+            --export-release "${{ matrix.preset }}" \
+            "build/${{ matrix.outdir }}/${{ matrix.binary }}"
+          ls -la "build/${{ matrix.outdir }}"
+
+      - name: Upload ${{ matrix.name }} artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: komorebi-${{ matrix.outdir }}
+          path: build/${{ matrix.outdir }}
+          if-no-files-found: error
