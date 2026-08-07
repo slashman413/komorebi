@@ -40,6 +40,7 @@ jobs:
           godot --headless --path . --import 2>&1 | tee import.log
 
       - name: Parse gate (per-script --check-only)
+        shell: bash
         run: |
           set -euo pipefail
           mapfile -t FILES < <(find . -name '*.gd' -not -path './.godot/*' | sort)
