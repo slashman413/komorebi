@@ -36,7 +36,7 @@ func _process(delta: float) -> void:
 		return
 
 	_elapsed += delta
-	var cycle_time: float = fposmod(_elapsed, BreathModel.CYCLE_SEC)
+	var cycle_time: float = fposmod(_elapsed, BreathModel.get_cycle_sec())
 	var phase: BreathModel.Phase = BreathModel.phase_at(cycle_time)
 	var amp: float = BreathModel.amplitude(cycle_time)
 	var pp: float = BreathModel.phase_progress(cycle_time)

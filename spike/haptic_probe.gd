@@ -45,11 +45,11 @@ func _on_phase_changed(phase: BreathModel.Phase) -> void:
 	# without looking at the screen. Durations align with each phase length.
 	match phase:
 		BreathModel.Phase.INHALE:
-			pulse(0.15, 0.25, BreathModel.INHALE_SEC)
+			pulse(0.15, 0.25, BreathModel.get_inhale_sec())
 		BreathModel.Phase.HOLD:
 			pulse(0.05, 0.05, 0.25) # brief "hold now" tap, then quiet
 		BreathModel.Phase.EXHALE:
-			pulse(0.25, 0.10, BreathModel.EXHALE_SEC)
+			pulse(0.25, 0.10, BreathModel.get_exhale_sec())
 
 ## Fire a rumble if we have (and want) haptics. No-op otherwise.
 func pulse(weak: float, strong: float, duration: float) -> void:

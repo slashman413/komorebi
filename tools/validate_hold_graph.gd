@@ -53,9 +53,11 @@ func _validate_graph(root: Node) -> void:
 
 	_check(rest_points >= 2, "Scene contains at least 2 rest points (found %d)" % rest_points)
 
+const ClimbHold = preload("res://src/nodes/climb_hold.gd")
+
 func _find_all_holds(node: Node) -> Array:
 	var result = []
-	if node is preload("res://src/nodes/climb_hold.gd"):
+	if node is ClimbHold:
 		result.append(node)
 	for child in node.get_children():
 		result.append_array(_find_all_holds(child))
