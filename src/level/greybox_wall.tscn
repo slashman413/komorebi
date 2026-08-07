@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3 uid="uid://cxab3kx1g6q2c"]
+
+[ext_resource type="Script" path="res://src/nodes/climb_hold.gd" id="1_a1b2c"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_k7m9a"]
+size = Vector3(10, 10, 1)
+
+[node name="GreyboxWall" type="Node3D"]
+
+[node name="WallMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_k7m9a")
+
+[node name="Hold1" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, 0.5)
+script = ExtResource("1_a1b2c")
+is_rest_point = true
+connected_holds = [NodePath("../Hold2")]
+
+[node name="Hold2" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0.5)
+script = ExtResource("1_a1b2c")
+connected_holds = [NodePath("../Hold3")]
+
+[node name="Hold3" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+script = ExtResource("1_a1b2c")
+is_rest_point = true
+connected_holds = [NodePath("../Hold4")]
+
+[node name="Hold4" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0.5)
+script = ExtResource("1_a1b2c")
+connected_holds = [NodePath("../Hold5")]
+
+[node name="Hold5" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0.5)
+script = ExtResource("1_a1b2c")
+is_rest_point = true
+connected_holds = []

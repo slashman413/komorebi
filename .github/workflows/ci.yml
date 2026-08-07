@@ -65,6 +65,11 @@ jobs:
           set -eux
           godot --headless --path . --script res://tests/run_tests.gd
 
+      - name: HoldGraph Validator (exit code gates the job)
+        run: |
+          set -eux
+          godot --headless --path . --script res://tools/validate_hold_graph.gd
+
   # ---------------------------------------------------------------------------
   # Gate 2: export Windows + Linux and upload the binaries as artifacts.
   # ---------------------------------------------------------------------------

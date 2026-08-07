@@ -47,7 +47,7 @@ func _about(a: float, b: float, eps: float = 0.0001) -> bool:
 
 func _test_breath_model() -> void:
 	print("[BreathModel]")
-	_check(_about(BreathModel.CYCLE_SEC, 19.0), "cycle length is 4+7+8 = 19s")
+	_check(_about(BreathModel.get_cycle_sec(), 19.0), "cycle length is 4+7+8 = 19s")
 
 	_check(BreathModel.phase_at(0.0) == BreathModel.Phase.INHALE, "t=0 -> INHALE")
 	_check(BreathModel.phase_at(3.9) == BreathModel.Phase.INHALE, "t=3.9 -> INHALE")
