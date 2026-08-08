@@ -1,0 +1,77 @@
+name: Release to itch.io
+
+# On a v* tag, export Linux + Windows and push them to itch.io via butler.
+#
+# One-time setup by the account owner (see LAUNCH.md):
+#   1. Create the itch.io project page:  slashman413/komorebi
+#   2. Generate an API key at https://itch.io/user/settings/api-keys
+#   3. Add it as a repo secret named BUTLER_API_KEY
+# Without the secret the job no-ops with a clear message (never fails the tag).
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.3"
+  ITCH_TARGET: "slashman413/komorebi"
+
+jobs:
+  export-and-publish:
+    name: Export + butler push
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    strategy:
+      matrix:
+        include:
+          - preset: "Linux"
+            outfile: "komorebi.x86_64"
+            channel: "linux"
+          - preset: "Windows Desktop"
+            outfile: "komorebi.exe"
+            channel: "windows"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Provision export templates
+        run: |
+          set -eux
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          if [ -d "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" ]; then
+            cp -r "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
+                  "$HOME/.local/share/godot/export_templates/" || true
+          fi
+
+      - name: Import project
+        run: godot --headless --path . --import 2>&1 | tee import.log
+
+      - name: Export ${{ matrix.preset }}
+        env:
+          PRESET: ${{ matrix.preset }}
+          OUTFILE: ${{ matrix.outfile }}
+        run: |
+          set -eux
+          mkdir -p build/"$PRESET"
+          godot --headless --path . --export-release "$PRESET" "build/$PRESET/$OUTFILE"
+          ls -la "build/$PRESET"
+
+      - name: Publish to itch.io via butler
+        if: ${{ env.BUTLER_HAS_KEY == 'true' }}
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          PRESET: ${{ matrix.preset }}
+          CHANNEL: ${{ matrix.channel }}
+        run: |
+          set -eux
+          VERSION="${GITHUB_REF_NAME#v}"
+          butler push "build/$PRESET" "$ITCH_TARGET:$CHANNEL" --userversion "$VERSION"
+
+      - name: No API key — skip publish
+        if: ${{ env.BUTLER_HAS_KEY != 'true' }}
+        run: |
+          echo "BUTLER_API_KEY secret not set — export succeeded, itch.io publish skipped."
+          echo "Add the secret (see LAUNCH.md) to enable automatic itch.io deploys on v* tags."
+    env:
+      BUTLER_HAS_KEY: ${{ secrets.BUTLER_API_KEY != '' }}

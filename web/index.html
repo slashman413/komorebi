@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Komorebi — breathe with the mountain</title>
+<meta name="description" content="A meditative game fusing 4-7-8 guided breathing with contemplative mountain climbing. Breathe in for 4, hold for 7, out for 8." />
+<meta property="og:title" content="Komorebi — breathe with the mountain" />
+<meta property="og:description" content="A meditative game fusing 4-7-8 guided breathing with contemplative mountain climbing." />
+<meta property="og:type" content="website" />
+<style>
+  :root {
+    --bg0: #0d1b2a; --bg1: #1b2a3a; --ink: #e8eef4; --muted: #9fb3c8;
+    --accent: #7fd1b9; --accent2: #6aa8d8; --line: rgba(255,255,255,.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #24384c 0%, transparent 60%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 56px 24px 80px; text-align: center; }
+  h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 700; letter-spacing: -.02em; }
+  .tag { color: var(--muted); font-size: clamp(1rem, 2.6vw, 1.2rem); margin-top: 14px; line-height: 1.5; }
+  .stage { position: relative; height: 340px; display: grid; place-items: center; margin: 28px 0 8px; }
+  .orb {
+    width: 150px; height: 150px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--accent) 0%, var(--accent2) 70%, #3d6f8e 100%);
+    box-shadow: 0 0 60px 8px rgba(127,209,185,.35), inset 0 0 40px rgba(255,255,255,.15);
+    transition: transform .1s linear;
+    will-change: transform;
+  }
+  .phase { position: absolute; bottom: 8px; left: 0; right: 0; }
+  .phase .label { font-size: 1.5rem; font-weight: 600; letter-spacing: .04em; }
+  .phase .count { color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 4px; font-size: 1rem; }
+  .controls { margin-top: 6px; }
+  button.play {
+    background: transparent; color: var(--ink); border: 1px solid var(--line);
+    padding: 10px 22px; border-radius: 999px; font-size: .95rem; cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  button.play:hover { border-color: var(--accent); background: rgba(127,209,185,.08); }
+  .ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin: 40px 0 10px; }
+  .cta {
+    text-decoration: none; padding: 14px 26px; border-radius: 12px; font-weight: 600;
+    border: 1px solid var(--line); color: var(--ink); transition: transform .15s, border-color .2s;
+  }
+  .cta:hover { transform: translateY(-2px); }
+  .cta.primary { background: linear-gradient(180deg, var(--accent), #5fb89e); color: #06232a; border: none; }
+  .cta.ghost:hover { border-color: var(--accent2); }
+  .note { color: var(--muted); font-size: .85rem; margin-top: 10px; }
+  .about { margin-top: 56px; text-align: left; border-top: 1px solid var(--line); padding-top: 32px; }
+  .about h2 { font-size: 1.3rem; margin-bottom: 12px; }
+  .about p { color: var(--muted); line-height: 1.7; margin-bottom: 14px; }
+  .foot { margin-top: 48px; color: var(--muted); font-size: .8rem; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Komorebi</h1>
+    <p class="tag">A meditative game where you breathe with the mountain.<br />In for <b>4</b>, hold for <b>7</b>, out for <b>8</b> — the climb answers your breath.</p>
+
+    <section class="stage" aria-label="Breathing guide">
+      <div class="orb" id="orb"></div>
+      <div class="phase">
+        <div class="label" id="label">Press begin</div>
+        <div class="count" id="count">4-7-8 breathing · one 19-second cycle</div>
+      </div>
+    </section>
+    <div class="controls">
+      <button class="play" id="toggle">Begin breathing</button>
+    </div>
+
+    <div class="ctas">
+      <a class="cta primary" id="steam" href="#">Wishlist on Steam</a>
+      <a class="cta ghost" href="https://slashman413.itch.io/komorebi">Play the demo on itch.io</a>
+    </div>
+    <p class="note">The orb above runs the real 4-7-8 rhythm from the game. In the full build it also drives audio and Steam Deck haptics.</p>
+
+    <section class="about">
+      <h2>What it is</h2>
+      <p>Komorebi (木漏れ日 — sunlight filtering through leaves) is a slow game. There is a
+      mountain, and there is your breath, and a single clock binds them. You climb not by
+      reflex but by rhythm: each held breath steadies your hands, each exhale finds the next
+      hold. An ecology and a soundscape shift as you settle.</p>
+      <p>Built in Godot 4.3 for the Steam Deck, where the controller pulses gently with the
+      breath curve, and for Windows and Linux. One authoritative timer drives the visuals,
+      audio, and haptics together — so what you see and what you feel never fall out of sync.</p>
+      <h2>Follow along</h2>
+      <p>Wishlist on Steam and grab the free demo on itch.io. Development is public on
+      <a href="https://github.com/slashman413/komorebi">GitHub</a>.</p>
+    </section>
+
+    <p class="foot">© Komorebi · made by <a href="https://slashman413.itch.io">slashman413</a></p>
+  </main>
+
+<script>
+(function () {
+  // Real 4-7-8 timing from the game's BreathModel (seconds).
+  var INHALE = 4, HOLD = 7, EXHALE = 8, CYCLE = INHALE + HOLD + EXHALE;
+  var MIN = 1.0, MAX = 1.55; // orb scale bounds
+  var orb = document.getElementById('orb');
+  var label = document.getElementById('label');
+  var count = document.getElementById('count');
+  var toggle = document.getElementById('toggle');
+  var running = false, startMs = 0, raf = 0;
+
+  function easeInOut(t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; }
+
+  function frame(now) {
+    if (!running) return;
+    var elapsed = (now - startMs) / 1000;
+    var t = elapsed % CYCLE;
+    var scale, phase, remain;
+    if (t < INHALE) {
+      phase = 'Breathe in'; remain = INHALE - t;
+      scale = MIN + (MAX - MIN) * easeInOut(t / INHALE);
+    } else if (t < INHALE + HOLD) {
+      phase = 'Hold'; remain = INHALE + HOLD - t; scale = MAX;
+    } else {
+      phase = 'Breathe out'; remain = CYCLE - t;
+      scale = MAX - (MAX - MIN) * easeInOut((t - INHALE - HOLD) / EXHALE);
+    }
+    orb.style.transform = 'scale(' + scale.toFixed(3) + ')';
+    label.textContent = phase;
+    count.textContent = Math.ceil(remain);
+    raf = requestAnimationFrame(frame);
+  }
+
+  function start() {
+    running = true; startMs = performance.now();
+    toggle.textContent = 'Pause';
+    raf = requestAnimationFrame(frame);
+  }
+  function stop() {
+    running = false; cancelAnimationFrame(raf);
+    toggle.textContent = 'Resume';
+    label.textContent = 'Paused';
+  }
+  toggle.addEventListener('click', function () { running ? stop() : start(); });
+
+  // Steam CTA: real store link once APPID is minted; falls back to GitHub for now.
+  var STEAM_APPID = ''; // set to the numeric appid after Steamworks setup
+  var steam = document.getElementById('steam');
+  steam.href = STEAM_APPID
+    ? 'https://store.steampowered.com/app/' + STEAM_APPID
+    : 'https://github.com/slashman413/komorebi';
+  if (!STEAM_APPID) { steam.textContent = 'Wishlist on Steam (soon)'; }
+})();
+</script>
+</body>
+</html>

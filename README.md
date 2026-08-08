@@ -1,114 +1,72 @@
-# Project Komorebi — Increment 0
+# Komorebi
 
-**Skeleton + Breathing Spike.** Goal: de-risk haptic / audio / visual sync of
-4-7-8 breathing on the Steam Deck at 60 FPS.
+**A meditative game that fuses 4-7-8 guided breathing with contemplative mountain climbing.**
+Breathe in for 4, hold for 7, out for 8 — the mountain answers your breath. Built for the
+Steam Deck (haptic breath feedback), also Windows and Linux.
 
 Godot **4.3+**, GDScript, statically typed throughout.
 
+[![CI](https://github.com/slashman413/komorebi/actions/workflows/ci.yml/badge.svg)](https://github.com/slashman413/komorebi/actions/workflows/ci.yml)
+
+> **Status:** playable vertical-slice / demo-alpha. The core breathing engine, a greybox
+> climb, ecology + soundscape systems, telemetry, and store-CTA onboarding are in.
+> Public store listings are the next step — see **[LAUNCH.md](LAUNCH.md)**.
+
 ---
 
-## What's here
+## The core hook
+
+A single authoritative **BreathClock** drives everything you see and feel — the orb, the
+procedural audio cues, and the controller haptics — so they **cannot drift relative to each
+other**. `BreathModel` holds the pure 4-7-8 timing (4 s inhale, 7 s hold, 8 s exhale = 19 s
+cycle) as unit-tested static functions. Try the breathing rhythm in your browser on the
+[landing page](https://slashman413.github.io/komorebi/) (no install).
+
+## What's in the build
 
 ```
 komorebi/
-├── project.godot                 # 4.3 project; autoloads registered; Deck res (1280x800), GL Compatibility
-├── export_presets.cfg            # Linux + Windows Desktop presets (x86_64)
-├── icon.svg
-├── autoload/                     # Autoload skeletons (service layer)
-│   ├── save_service.gd           #   atomic write + schema_version:1 + migration hook
-│   ├── steam_service.gd          #   stub (no GodotSteam dependency yet — keeps headless import green)
-│   ├── input_router.gd           #   central input intents; tracks kbd vs. gamepad
-│   └── game_director.gd          #   coarse state machine + service wiring; loads save on boot
-├── spike/                        # The Breathing Spike
-│   ├── breath_model.gd           #   PURE 4-7-8 math (unit-tested in isolation)
-│   ├── breath_clock.gd           #   THE single clock — one tick, everything fans out from it
-│   ├── breath_visual.gd          #   visual breath curve (expanding/contracting orb)
-│   ├── breath_audio.gd           #   procedural sine cues (no binary assets), driven by the clock
-│   ├── haptic_probe.gd           #   capability-probed rumble; degrades to silence if no pad
-│   ├── drift_overlay.gd          #   live FPS + frame-clock-vs-wall-clock drift readout (F3)
-│   └── breathing_spike.tscn      #   composition scene (main scene)
-├── tests/
-│   ├── run_tests.gd              #   dependency-free headless runner; exits 0/1 for CI
-│   └── fixtures/save_v1.json     #   one committed v1 save fixture
-└── .github/workflows/ci.yml      # import + parse gate + tests, then export Win+Linux + upload
+├── autoload/            # service layer: save (atomic, versioned), steam (stub), input, director, telemetry
+├── spike/               # the Breathing Spike — single-clock breath: model, clock, visual, audio, haptics, drift overlay
+├── src/
+│   ├── level/           # vertical_slice: greybox climb + onboarding + wishlist/itch CTAs
+│   ├── systems/         # climb, camera, ecology, soundscape, audio director
+│   ├── nodes/           # climb holds
+│   └── locale/          # locale table (i18n-ready)
+├── tools/               # content linter + hold-graph validator
+├── tests/               # dependency-free headless runner (gates CI)
+├── web/                 # GitHub Pages landing page (playable JS breathing orb)
+└── .github/workflows/   # ci.yml (import+parse+test+export), pages.yml, release.yml (butler → itch.io)
 ```
-
-## The single-clock design (why this de-risks sync)
-
-Everything visible or felt reads from **one** source of truth:
-
-- `BreathClock` accumulates frame `delta` into an authoritative `elapsed` time and
-  emits exactly two signals — `breath_tick` (every frame, continuous values) and
-  `phase_changed` (only on INHALE→HOLD→EXHALE transitions).
-- `BreathVisual` (per-frame), `BreathAudio` and `HapticProbe` (event-driven), and
-  `DriftOverlay` all **subscribe** to that clock. None of them runs its own timer.
-
-Because there is only one timer, haptics/audio/visual **cannot drift relative to
-each other**. The remaining risk — the frame clock diverging from real time under
-load on the Deck — is exactly what `DriftOverlay` measures: `elapsed` (delta-summed)
-vs. `real_seconds` (`Time.get_ticks_usec`), reported live in ms with a running peak.
-
-`BreathModel` holds the 4-7-8 timing (4 s inhale, 7 s hold, 8 s exhale = 19 s cycle)
-as pure static functions, so the curve is unit-tested with no scene tree.
 
 ## Run it locally
 
 Requires Godot 4.3+.
 
 ```bash
-# From the komorebi/ directory:
-godot --path .                       # runs the main scene (the spike)
+godot --path .          # runs the vertical slice
 # In-app: F3 toggles the drift overlay, Esc pauses.
 
-# Run the headless tests exactly as CI does:
+# Headless tests exactly as CI runs them:
 godot --headless --path . --script res://tests/run_tests.gd ; echo "exit=$?"
 ```
 
-A connected gamepad (or the Deck's built-in controller) enables haptics; without
-one the spike runs visual + audio only and the overlay shows `haptics: unavailable`.
+A connected gamepad (or the Deck's built-in controller) enables haptics; without one the
+game runs visual + audio only.
 
-## CI (`.github/workflows/ci.yml`)
+## Continuous delivery
 
-Runs in the `barichello/godot-ci:4.3` container:
+- **`ci.yml`** — import, per-script parse gate, headless tests, then export Linux + Windows
+  builds as artifacts. Runs on every push.
+- **`pages.yml`** — publishes `web/` to GitHub Pages on push to the default branch.
+- **`release.yml`** — on a `v*` tag, exports Linux + Windows and pushes them to itch.io via
+  [butler](https://itch.io/docs/butler/). Requires a one-time `BUTLER_API_KEY` repo secret;
+  skips cleanly if it is absent. See **[LAUNCH.md](LAUNCH.md)**.
 
-1. **import-and-test** — `--import`, then a per-script `--check-only` parse gate,
-   a log-scan backstop, then the headless test runner (its exit code gates the job).
-2. **export** — matrix (Linux `komorebi.x86_64`, Windows `komorebi.exe`), uploads
-   each build as an artifact (`komorebi-linux`, `komorebi-windows`).
+## Toward revenue
 
----
-
-## ⚠️ Push + first-run status (read this)
-
-This increment was authored on a host with **no Godot binary and no target
-repository / push credentials**, so two things in the task's "Output" line could
-**not** be executed or verified from here and are left as the human/CI step:
-
-- **Code push** — there is no repo to push to yet. See "How to ship" below.
-- **A *proven* green pipeline** — CI is authored to pass, but has not been run,
-  because that requires the push above. First run is the source of truth.
-
-Everything that does not require a repo or a Godot binary is complete and
-self-consistent: locally-verifiable JSON/YAML is valid, the code is written to the
-project's typing/signal conventions, and the tests assert the SaveService and
-BreathModel invariants the task calls for.
-
-### How to ship (≈2 minutes)
-
-```bash
-cd komorebi
-git init -b main
-git add .
-git commit -m "Komorebi Increment 0: skeleton + breathing spike"
-gh repo create <owner>/komorebi --private --source=. --push   # or add a remote + push
-# Open the Actions tab and confirm the CI run goes green.
-```
-
-### One thing to sanity-check on first CI run
-
-`export_presets.cfg` is normally serialized by the Godot editor. The committed
-presets are hand-written and correct for the common case, but preset options can
-be version-sensitive. If the **export** job fails to find/serialize a preset,
-open the project once in the editor (`Project → Export`), confirm the **Linux**
-and **Windows Desktop** presets exist, save, and commit the regenerated file. The
-**import-and-test** gate does not depend on presets and should pass regardless.
+The honest path for a solo Godot dev: a free "pay-what-you-want" demo on **itch.io** as the
+top of a wishlist funnel to a paid **Steam** release. The remaining gates are steps only the
+account owner can take (create the store pages, pay the Steam Direct fee, add the itch API
+key). Everything automatable is wired; the checklist is in **[LAUNCH.md](LAUNCH.md)**, and
+launch copy is in **[store/](store/)**.
