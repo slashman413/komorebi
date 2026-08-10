@@ -132,36 +132,24 @@ Every run — **success or failure** — generates and uploads a report:
 
 ### 4. Failure notification
 
-- A notification is created **ONLY when a daily run fails** — green runs send
-  nothing. The notification is a **GitHub Issue** on this repo (the SMTP email
-  option was deliberately not used — see §5).
-- The issue contains the failure title (`⚠️ Daily tests FAILED — Run #<n>`), a
-  direct link to the failed Actions run, and the **full report inlined** (with a
-  `(no report available)` fallback), labeled `ci-failure` + `daily-tests`.
-- It is created by `actions/github-script@v7` in the last step, gated with
-  `if: failure()`, so it fires exactly once per failed run. The job's
-  `permissions: issues: write` is what makes issue creation possible (the repo's
-  default token is read-only).
+- GitHub **emails the repository owner automatically** whenever a workflow run
+  fails — no custom code, no secrets, nothing to configure in this repo.
+- Notification scope is controlled in GitHub, not in the workflow: **Settings →
+  Notifications → Actions** (per-repo) or the global notification preferences.
+  "Send notifications for failed workflows" is on by default; enable "Send
+  notifications for successful workflows" if you also want green-run emails.
+- A failed daily run therefore produces: the built-in failure email **plus** the
+  retained report artifact (see §3) — the report is always downloadable from the
+  run's Artifacts tab even when the run failed.
 
 ### 5. Secrets
 
-**The current workflow uses no secrets at all** — the GitHub Issue fallback runs
-on the workflow's default token, so there is nothing to configure. The SMTP email
-variant was intentionally **not** wired in (J5), but if you ever switch to email
-notifications you would add these repository secrets and use an
-`action-send-mail`-style step, all firing only on failure:
-
-| Secret            | Purpose                                              |
-|-------------------|------------------------------------------------------|
-| `MAIL_SERVER`     | SMTP server hostname (e.g. `smtp.gmail.com`)         |
-| `MAIL_PORT`       | SMTP port (e.g. `587` for STARTTLS)                  |
-| `MAIL_USERNAME`   | SMTP login username                                  |
-| `MAIL_PASSWORD`   | SMTP password / app password                         |
-| `REPORT_TO`       | Recipient address for the failure report             |
-
-**To change the notification recipient today (issue path):** nothing to do — the
-issue lands on this repo's issue tracker. If email is enabled later, set
-`REPORT_TO` to the new address in Settings → Secrets and variables → Actions.
+**The workflow uses no secrets at all** — failure notification rides on GitHub's
+built-in Actions email, and the test gate itself needs no credentials. There is
+nothing to configure under Settings → Secrets and variables → Actions. (An earlier
+revision created a GitHub issue on failure via `actions/github-script@v7` with
+`permissions: issues: write`; that step and the extra permission were removed
+because they are redundant with GitHub's built-in notification.)
 
 ### 6. Manual trigger
 
@@ -171,8 +159,9 @@ Run the tests anytime, without waiting for the schedule:
   branch → **Run workflow**.
 - **CLI:** `gh workflow run daily-tests.yml` (optionally `--ref <branch>`).
 
-The run executes the exact same steps (including report upload and the
-failure-only issue), so it also serves as an on-demand smoke test.
+The run executes the exact same steps (including report upload), so it also
+serves as an on-demand smoke test — useful to verify a fix before the next
+scheduled run.
 
 ---
 
