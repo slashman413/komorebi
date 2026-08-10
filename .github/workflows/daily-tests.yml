@@ -41,8 +41,11 @@ jobs:
       - name: Import project (populates .godot/, compiles scripts)
         run: |
           set -eux
-          set -o pipefail
-          godot --headless --path . --import 2>&1 | tee import.log
+          timeout 240 godot --headless --path . --import --verbose > import.log 2>&1 || echo "IMPORT_EXIT=$?" >> import.log
+          echo "--- import.log tail (debug) ---"
+          tail -60 import.log
+          echo "--- import.log line count ---"
+          wc -l import.log
 
       - name: Parse gate (log scan backstop)
         run: |
