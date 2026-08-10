@@ -8,7 +8,7 @@ onready var climb_system: ClimbSystem = get_node_or_null(climb_system_path) if n
 
 func _ready() -> void:
 	if climb_system:
-		climb_system.hold_reached.connect(_on_hold_reached)
+		climb_system.hold_reached.connect(self, "_on_hold_reached")
 
 func _process(delta: float) -> void:
 	if climb_system and climb_system.current_hold:
