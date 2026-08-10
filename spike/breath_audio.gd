@@ -14,9 +14,9 @@ export var enabled: bool = true
 
 const MIX_RATE: int = 22050
 
-var _tone_inhale: AudioStreamWAV
-var _tone_hold: AudioStreamWAV
-var _tone_exhale: AudioStreamWAV
+var _tone_inhale: AudioStreamSample
+var _tone_hold: AudioStreamSample
+var _tone_exhale: AudioStreamSample
 
 onready var _clock: BreathClock = get_node(clock_path) as BreathClock
 
@@ -43,7 +43,7 @@ func _on_phase_changed(phase: int) -> void:
 
 ## Build a mono 16-bit sine tone with a soft attack/decay envelope so cues never
 ## click. [param rising] applies a slight upward pitch glide for the inhale.
-func _make_tone(freq: float, seconds: float, rising: bool) -> AudioStreamWAV:
+func _make_tone(freq: float, seconds: float, rising: bool) -> AudioStreamSample:
 	var count: int = int(MIX_RATE * seconds)
 	var data := PoolByteArray()
 	data.resize(count * 2)
@@ -60,8 +60,8 @@ func _make_tone(freq: float, seconds: float, rising: bool) -> AudioStreamWAV:
 		data[i * 2] = sample16 & 0xFF
 		data[i * 2 + 1] = (sample16 >> 8) & 0xFF
 
-	var wav: AudioStreamWAV = AudioStreamWAV.new()
-	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	var wav: AudioStreamSample = AudioStreamSample.new()
+	wav.format = AudioStreamSample.FORMAT_16_BITS
 	wav.mix_rate = MIX_RATE
 	wav.stereo = false
 	wav.data = data

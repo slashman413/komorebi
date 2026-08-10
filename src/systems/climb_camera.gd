@@ -12,10 +12,12 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if climb_system and climb_system.current_hold:
-		var target_pos = climb_system.current_hold.global_position
+		var target_pos = climb_system.current_hold.global_transform.origin
 		# Offset slightly back for read-line camera perspective
 		target_pos.z += 5.0
-		global_position = global_position.lerp(target_pos, delta * follow_speed)
+		var t: Transform = global_transform
+		t.origin = t.origin.lerp(target_pos, delta * follow_speed)
+		global_transform = t
 
 func _on_hold_reached(hold: ClimbHold) -> void:
 	pass

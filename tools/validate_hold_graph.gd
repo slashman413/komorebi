@@ -48,7 +48,7 @@ func _validate_graph(root: Node) -> void:
 			pass
 			
 		for target in connections:
-			var dist = hold.global_position.distance_to(target.global_position)
+			var dist = hold.global_transform.origin.distance_to(target.global_transform.origin)
 			_check(dist <= 2.5, "Hold %s connected to %s is within MAX_REACH (dist: %.2f)" % [hold.name, target.name, dist])
 
 	_check(rest_points >= 2, "Scene contains at least 2 rest points (found %d)" % rest_points)

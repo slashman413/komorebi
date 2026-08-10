@@ -18,7 +18,7 @@ func _init() -> void:
 	var has_error = false
 	while not file.eof_reached():
 		var row = file.get_csv_line()
-		if row.size() <= 1 and row[0].is_empty():
+		if row.size() <= 1 and row[0].empty():
 			continue # skip empty trailing line
 			
 		line_count += 1
@@ -26,7 +26,7 @@ func _init() -> void:
 			printerr("Line ", line_count, " does not have 3 columns: ", row)
 			has_error = true
 			
-		if row[0].is_empty():
+		if row[0].empty():
 			printerr("Line ", line_count, " missing ID.")
 			has_error = true
 			

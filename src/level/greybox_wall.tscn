@@ -2,7 +2,7 @@
 
 [ext_resource path="res://src/nodes/climb_hold.gd" type="Script" id=1]
 
-[sub_resource type="BoxMesh" id=1]
+[sub_resource type="CubeMesh" id=1]
 size = Vector3(10, 10, 1)
 
 [node name="GreyboxWall" type="Spatial"]

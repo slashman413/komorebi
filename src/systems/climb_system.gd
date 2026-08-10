@@ -33,7 +33,7 @@ func try_reach(target_hold: ClimbHold) -> bool:
 				break
 
 	if is_connected:
-		if current_hold.global_position.distance_to(target_hold.global_position) <= MAX_REACH:
+		if current_hold.global_transform.origin.distance_to(target_hold.global_transform.origin) <= MAX_REACH:
 			current_hold = target_hold
 			emit_signal("hold_reached", current_hold)
 			

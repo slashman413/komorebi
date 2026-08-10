@@ -34,7 +34,7 @@ func _ready() -> void:
 	cta_box.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	cta_box.margin_bottom = -20
 	cta_box.margin_right = -20
-	cta_box.alignment = BoxContainer.ALIGNMENT_END
+	cta_box.alignment = BoxContainer.ALIGN_END
 
 	var wishlist_btn = Button.new()
 	wishlist_btn.text = "Wishlist on Steam"

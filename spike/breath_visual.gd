@@ -35,7 +35,7 @@ func _draw() -> void:
 	var radius: float = lerp(min_radius, max_radius, _amplitude)
 	var tint: Color = _phase_color(_phase)
 	# Filled breathing orb + a brighter guide ring.
-	draw_circle(Vector2.ZERO, radius, Color(tint, 0.35))
+	draw_circle(Vector2.ZERO, radius, Color(tint.r, tint.g, tint.b, 0.35))
 	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 96, tint, 4.0, true)
 	draw_arc(Vector2.ZERO, max_radius, 0.0, TAU, 96, Color(1, 1, 1, 0.08), 2.0, true)
 
