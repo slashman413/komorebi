@@ -37,7 +37,9 @@ jobs:
       - name: Import project (populates .godot/, compiles scripts)
         run: |
           set -eux
-          godot --headless --path . --import 2>&1 | tee import.log
+          # Godot 3.5 --import boots the main scene and never exits on its own;
+          # --quit quits after the first frame (same behavior as daily-tests.yml).
+          godot --headless --path . --import --quit 2>&1 | tee import.log
 
 
 
@@ -101,7 +103,7 @@ jobs:
             || { echo "::error::export templates for ${GODOT_VERSION} not found"; exit 1; }
 
       - name: Import project
-        run: godot --headless --path . --import
+        run: godot --headless --path . --import --quit
 
       - name: Export ${{ matrix.name }}
         run: |

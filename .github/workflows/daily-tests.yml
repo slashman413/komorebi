@@ -42,7 +42,11 @@ jobs:
         run: |
           set -eux
           set -o pipefail
-          godot --headless --path . --import 2>&1 | tee import.log
+          # Godot 3.5 --import boots the main scene and never exits on its own;
+          # --quit quits after the first frame (imports still run, loaded-script
+          # parse errors still print for the grep backstop). timeout is a hard
+          # backstop so a hang can never zombie a run for the 6h job limit.
+          timeout 120 godot --headless --path . --import --quit 2>&1 | tee import.log
 
       - name: Parse gate (log scan backstop)
         run: |
