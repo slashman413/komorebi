@@ -1,6 +1,6 @@
 extends Node
 
-signal overlay_toggled(active: bool)
+signal overlay_toggled(active)
 
 var available: bool = false
 var app_id: int = 0

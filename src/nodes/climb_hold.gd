@@ -1,20 +1,20 @@
-@tool
+tool
 class_name ClimbHold
-extends Node3D
+extends Spatial
 
-@export var is_rest_point: bool = false
-@export var connected_holds: Array[NodePath] = []
+export var is_rest_point: bool = false
+export(Array, NodePath) var connected_holds = []
 
-func get_connected_nodes() -> Array[ClimbHold]:
-	var nodes: Array[ClimbHold] = []
+func get_connected_nodes() -> Array:
+	var nodes: Array = []
 	for path in connected_holds:
 		var node = get_node_or_null(path)
 		if node is ClimbHold:
 			nodes.append(node)
 	return nodes
 
-func _get_configuration_warnings() -> PackedStringArray:
-	var warnings = PackedStringArray()
-	if connected_holds.is_empty():
+func _get_configuration_warnings() -> PoolStringArray:
+	var warnings := PoolStringArray()
+	if connected_holds.empty():
 		warnings.append("Hold is not connected to any other holds.")
 	return warnings

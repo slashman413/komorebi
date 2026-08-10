@@ -1,8 +1,8 @@
 class_name EcologySystem
 extends Node
 
-signal vitality_changed(new_vitality: float)
-signal node_restored(node_id: String)
+signal vitality_changed(new_vitality)
+signal node_restored(node_id)
 
 enum PlantState { SEED, SPROUT, BLOOM, WITHERED }
 
@@ -36,7 +36,7 @@ func _ready() -> void:
 
 func update_vitality(delta_vitality: float) -> void:
 	global_vitality = clamp(global_vitality + delta_vitality, 0.0, 1.0)
-	vitality_changed.emit(global_vitality)
+	emit_signal("vitality_changed", global_vitality)
 	print("[EcologySystem] Global vitality updated to: ", global_vitality)
 	
 func register_plant(node_id: String) -> void:
@@ -50,7 +50,7 @@ func restore_node(node_id: String) -> void:
 		plant.advance_state()
 		print("[EcologySystem] Node restored/advanced: ", node_id, " | New state: ", plant.state)
 	
-	node_restored.emit(node_id)
+	emit_signal("node_restored", node_id)
 	update_vitality(0.1)
 
 func get_light_direction() -> Vector3:

@@ -2,7 +2,7 @@ class_name SoundscapeSystem
 extends Node
 
 signal puzzle_solved
-signal waveform_updated(data: Array)
+signal waveform_updated(data)
 
 var is_puzzle_active: bool = false
 var target_frequency: float = 432.0
@@ -25,9 +25,9 @@ func update_frequency(freq: float) -> void:
 	var data = []
 	for i in range(64):
 		data.append(sin(i * current_frequency * 0.01))
-	waveform_updated.emit(data)
+	emit_signal("waveform_updated", data)
 	
 	if abs(current_frequency - target_frequency) < 5.0:
 		print("[SoundscapeSystem] Target frequency matched! Puzzle solved.")
 		is_puzzle_active = false
-		puzzle_solved.emit()
+		emit_signal("puzzle_solved")

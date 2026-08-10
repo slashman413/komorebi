@@ -1,0 +1,120 @@
+name: Daily Tests
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write   # REQUIRED — repo default token is read-only; failure-issue creation needs write (J2 handoff)
+
+env:
+  GODOT_VERSION: "3.5.2"
+
+jobs:
+  daily-test-run:
+    name: Daily Import + Parse Gate + Tests
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:3.5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Provision export templates
+        run: |
+          set -eux
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          # barichello image ships templates under /root; move them where this
+          # job's HOME expects them (no-op/harmless if already colocated).
+          if [ -d "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" ]; then
+            cp -r "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
+                  "$HOME/.local/share/godot/export_templates/" || true
+          fi
+          ls -la "$HOME/.local/share/godot/export_templates/" || true
+
+      - name: Import project (populates .godot/, compiles scripts)
+        run: |
+          set -eux
+          set -o pipefail
+          godot --headless --path . --import 2>&1 | tee import.log
+
+      - name: Parse gate (log scan backstop)
+        run: |
+          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script" import.log; then
+            echo "::error::Script/parse errors found during import"
+            grep -E "SCRIPT ERROR|Parse Error|Failed to load script" import.log || true
+            exit 1
+          fi
+          echo "No parse errors in import log."
+
+      - name: Headless tests (exit code gates the job)
+        run: |
+          set -eux
+          set -o pipefail
+          godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee test_results.log
+
+      - name: HoldGraph Validator (exit code gates the job)
+        run: |
+          set -eux
+          set -o pipefail
+          godot --headless --path . --script res://tools/validate_hold_graph.gd 2>&1 | tee holdgraph_results.log
+
+      - name: Content Linter (exit code gates the job)
+        run: |
+          set -eux
+          set -o pipefail
+          godot --headless --path . --script res://tools/content_linter.gd 2>&1 | tee linter_results.log
+
+      - name: Generate test report
+        if: always()
+        run: |
+          echo "# Daily Test Report" > report.md
+          echo "" >> report.md
+          echo "**Run:** ${{ github.run_id }}" >> report.md
+          echo "**Date:** $(date -u +"%Y-%m-%d %H:%M UTC")" >> report.md
+          echo "**Status:** ${{ job.status }}" >> report.md
+          echo "" >> report.md
+          echo "## Import + Parse Gate" >> report.md
+          echo "\`\`\`" >> report.md
+          tail -20 import.log >> report.md 2>/dev/null || echo "(no import log)" >> report.md
+          echo "\`\`\`" >> report.md
+          echo "" >> report.md
+          echo "## Headless Tests (run_tests.gd)" >> report.md
+          echo "\`\`\`" >> report.md
+          cat test_results.log >> report.md 2>/dev/null || echo "(no test log)" >> report.md
+          echo "\`\`\`" >> report.md
+          echo "" >> report.md
+          echo "## HoldGraph Validator" >> report.md
+          echo "\`\`\`" >> report.md
+          cat holdgraph_results.log >> report.md 2>/dev/null || echo "(no holdgraph log)" >> report.md
+          echo "\`\`\`" >> report.md
+          echo "" >> report.md
+          echo "## Content Linter" >> report.md
+          echo "\`\`\`" >> report.md
+          cat linter_results.log >> report.md 2>/dev/null || echo "(no linter log)" >> report.md
+          echo "\`\`\`" >> report.md
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-test-report-${{ github.run_id }}
+          path: report.md
+          retention-days: 30
+
+      - name: Create failure issue
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            let report = "(no report available)";
+            try { report = fs.readFileSync("report.md", "utf8"); } catch(e) {}
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `⚠️ Daily tests FAILED — Run #${context.runNumber}`,
+              body: `Daily test run failed.\n\n**Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\n## Report\n\n${report}`,
+              labels: ["ci-failure", "daily-tests"]
+            });

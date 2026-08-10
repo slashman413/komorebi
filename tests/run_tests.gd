@@ -41,7 +41,13 @@ func _check(condition: bool, label: String) -> void:
 		printerr("  FAIL: %s" % label)
 
 func _about(a: float, b: float, eps: float = 0.0001) -> bool:
-	return absf(a - b) <= eps
+	return abs(a - b) <= eps
+
+func _parse_json(text: String):
+	var result: JSONParseResult = JSON.parse(text)
+	if result.error != OK:
+		return null
+	return result.result
 
 # ---- BreathModel (pure math) -------------------------------------------------
 
@@ -80,14 +86,14 @@ func _test_save_service_roundtrip() -> void:
 	_check(err == OK, "write_save returns OK")
 
 	# Atomic invariant: the temp file must not survive a successful write.
-	_check(not FileAccess.file_exists(SaveServiceScript.TEMP_PATH), "temp file removed after atomic rename")
-	_check(FileAccess.file_exists(SaveServiceScript.SAVE_PATH), "save file exists after write")
+	_check(not File.new().file_exists(SaveServiceScript.TEMP_PATH), "temp file removed after atomic rename")
+	_check(File.new().file_exists(SaveServiceScript.SAVE_PATH), "save file exists after write")
 
 	var loaded: Dictionary = svc.read_save()
 	_check(int(loaded.get("schema_version", -1)) == SaveServiceScript.SCHEMA_VERSION, "loaded schema_version == 1")
 	_check(int(loaded["progress"]["sessions_completed"]) == 42, "round-trips written value (42)")
 
-	svc.free()
+	svc = null
 
 func _test_save_service_fixture() -> void:
 	print("[SaveService fixture]")
@@ -95,12 +101,13 @@ func _test_save_service_fixture() -> void:
 	var svc := SaveServiceScript.new()
 
 	# 1) The committed fixture parses and is a valid v1 save.
-	var f: FileAccess = FileAccess.open("res://tests/fixtures/save_v1.json", FileAccess.READ)
-	_check(f != null, "fixture file opens")
-	if f == null:
-		svc.free()
+	var f := File.new()
+	var ferr: int = f.open("res://tests/fixtures/save_v1.json", File.READ)
+	_check(ferr == OK, "fixture file opens")
+	if ferr != OK:
+		svc = null
 		return
-	var parsed: Variant = JSON.parse_string(f.get_as_text())
+	var parsed = _parse_json(f.get_as_text())
 	f.close()
 	_check(typeof(parsed) == TYPE_DICTIONARY, "fixture is a JSON object")
 	var fixture: Dictionary = parsed
@@ -108,16 +115,19 @@ func _test_save_service_fixture() -> void:
 	_check(int(fixture["progress"]["sessions_completed"]) == 7, "fixture sessions_completed == 7")
 
 	# 2) The load path accepts the fixture and preserves its data.
-	var out: FileAccess = FileAccess.open(SaveServiceScript.SAVE_PATH, FileAccess.WRITE)
-	out.store_string(JSON.stringify(fixture, "\t"))
-	out.close()
+	var out := File.new()
+	var oerr: int = out.open(SaveServiceScript.SAVE_PATH, File.WRITE)
+	if oerr == OK:
+		out.store_string(JSON.print(fixture, "	"))
+		out.close()
 	var loaded: Dictionary = svc.read_save()
 	_check(int(loaded.get("schema_version", -1)) == 1, "fixture loads as v1 via read_save")
 	_check(int(loaded["progress"]["sessions_completed"]) == 7, "fixture value preserved through load")
 
-	svc.free()
+	svc = null
 
 func _reset_user_save() -> void:
 	for path in [SaveServiceScript.SAVE_PATH, SaveServiceScript.TEMP_PATH]:
-		if FileAccess.file_exists(path):
-			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+		if File.new().file_exists(path):
+			var dir := Directory.new()
+			dir.remove(ProjectSettings.globalize_path(path))

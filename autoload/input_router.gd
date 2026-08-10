@@ -11,23 +11,23 @@ extends Node
 
 signal pause_requested
 signal confirm_pressed
-signal device_kind_changed(using_gamepad: bool)
+signal device_kind_changed(using_gamepad)
 
 var using_gamepad: bool = false
 
 func _ready() -> void:
 	# Register fallback actions if the project didn't define them, so the spike
 	# runs standalone (F6) and in a fresh checkout without an InputMap.
-	_ensure_action("komorebi_pause", KEY_ESCAPE, JOY_BUTTON_START)
-	_ensure_action("komorebi_confirm", KEY_ENTER, JOY_BUTTON_A)
-	using_gamepad = not Input.get_connected_joypads().is_empty()
+	_ensure_action("komorebi_pause", KEY_ESCAPE, JOY_START)
+	_ensure_action("komorebi_confirm", KEY_ENTER, JOY_XBOX_A)
+	using_gamepad = not Input.get_connected_joypads().empty()
 
 func _unhandled_input(event: InputEvent) -> void:
 	_update_device_kind(event)
 	if event.is_action_pressed("komorebi_pause"):
-		pause_requested.emit()
+		emit_signal("pause_requested")
 	elif event.is_action_pressed("komorebi_confirm"):
-		confirm_pressed.emit()
+		emit_signal("confirm_pressed")
 
 func _update_device_kind(event: InputEvent) -> void:
 	var now_gamepad: bool = using_gamepad
@@ -37,14 +37,14 @@ func _update_device_kind(event: InputEvent) -> void:
 		now_gamepad = false
 	if now_gamepad != using_gamepad:
 		using_gamepad = now_gamepad
-		device_kind_changed.emit(using_gamepad)
+		emit_signal("device_kind_changed", using_gamepad)
 
-func _ensure_action(action: StringName, key: Key, pad_button: JoyButton) -> void:
+func _ensure_action(action, key: int, pad_button: int) -> void:
 	if InputMap.has_action(action):
 		return
 	InputMap.add_action(action)
 	var key_event: InputEventKey = InputEventKey.new()
-	key_event.physical_keycode = key
+	key_event.scancode = key
 	InputMap.action_add_event(action, key_event)
 	var pad_event: InputEventJoypadButton = InputEventJoypadButton.new()
 	pad_event.button_index = pad_button

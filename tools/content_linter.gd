@@ -2,8 +2,8 @@ extends SceneTree
 
 func _init() -> void:
 	print("Running Content Linter...")
-	var file = FileAccess.open("res://src/locale/locale_table.csv", FileAccess.READ)
-	if not file:
+	var file := File.new()
+	if file.open("res://src/locale/locale_table.csv", File.READ) != OK:
 		printerr("Failed to open locale_table.csv")
 		quit(1)
 		return

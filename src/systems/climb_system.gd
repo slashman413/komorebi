@@ -1,14 +1,14 @@
 extends Node
 class_name ClimbSystem
 
-signal hold_reached(hold: ClimbHold)
+signal hold_reached(hold)
 
 var current_hold: ClimbHold
 const MAX_REACH = 2.5
 
 func start_climb(start_hold: ClimbHold):
 	current_hold = start_hold
-	hold_reached.emit(current_hold)
+	emit_signal("hold_reached", current_hold)
 	
 	if start_hold.is_rest_point:
 		_trigger_breathing(start_hold)
@@ -35,7 +35,7 @@ func try_reach(target_hold: ClimbHold) -> bool:
 	if is_connected:
 		if current_hold.global_position.distance_to(target_hold.global_position) <= MAX_REACH:
 			current_hold = target_hold
-			hold_reached.emit(current_hold)
+			emit_signal("hold_reached", current_hold)
 			
 			if current_hold.is_rest_point:
 				_trigger_breathing(current_hold)

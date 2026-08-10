@@ -1,8 +1,10 @@
-extends Camera3D
+extends Camera
 class_name ClimbCamera
 
-@export var climb_system: ClimbSystem
-@export var follow_speed: float = 5.0
+export(NodePath) var climb_system_path
+export var follow_speed: float = 5.0
+
+onready var climb_system: ClimbSystem = get_node_or_null(climb_system_path) if not climb_system_path.is_empty() else null
 
 func _ready() -> void:
 	if climb_system:
