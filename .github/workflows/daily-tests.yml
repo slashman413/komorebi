@@ -1,0 +1,62 @@
+name: Daily Tests
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "3.5.2"
+
+jobs:
+  daily-test-run:
+    name: Daily Import + Parse Gate + Tests
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:3.5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Provision export templates
+        run: |
+          set -eux
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          # barichello image ships templates under /root; move them where this
+          # job's HOME expects them (no-op/harmless if already colocated).
+          if [ -d "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" ]; then
+            cp -r "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
+                  "$HOME/.local/share/godot/export_templates/" || true
+          fi
+          ls -la "$HOME/.local/share/godot/export_templates/" || true
+
+      - name: Import project (populates .godot/, compiles scripts)
+        run: |
+          set -eux
+          godot --headless --path . --import 2>&1 | tee import.log
+
+      - name: Parse gate (log scan backstop)
+        run: |
+          if grep -Eq "SCRIPT ERROR|Parse Error|Failed to load script" import.log; then
+            echo "::error::Script/parse errors found during import"
+            grep -E "SCRIPT ERROR|Parse Error|Failed to load script" import.log || true
+            exit 1
+          fi
+          echo "No parse errors in import log."
+
+      - name: Headless tests (exit code gates the job)
+        run: |
+          set -eux
+          godot --headless --path . --script res://tests/run_tests.gd
+
+      - name: HoldGraph Validator (exit code gates the job)
+        run: |
+          set -eux
+          godot --headless --path . --script res://tools/validate_hold_graph.gd
+
+      - name: Content Linter (exit code gates the job)
+        run: |
+          set -eux
+          godot --headless --path . --script res://tools/content_linter.gd
+
+      # --- Report generation step will be added by J4 ---
+      # --- Failure email step will be added by J5 ---
