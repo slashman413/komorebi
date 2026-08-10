@@ -26,11 +26,13 @@ jobs:
       - name: Provision export templates
         run: |
           set -eux
-          # Derive the template dir from the installed engine (godot --version
-          # -> 3.5.stable.official -> dir 3.5.stable). The image keeps Godot
-          # 3.x templates under templates/ (Godot 4.x: export_templates/).
-          GODOT_FULL="$(godot --version)"
-          GODOT_TPL="${GODOT_FULL%.*}"
+          # Derive the template dir from the installed engine (godot
+          # --headless --version -> 3.5.stable.official.991bb6ac7 -> dir
+          # 3.5.stable). The image keeps Godot 3.x templates under templates/
+          # (Godot 4.x: export_templates/).
+          GODOT_FULL="$(godot --headless --version 2>/dev/null || true)"
+          GODOT_TPL="$(printf '%s' "$GODOT_FULL" | cut -d. -f1-3)"
+          [ -n "$GODOT_TPL" ] || { echo "::error::could not determine godot version"; exit 1; }
           echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
           mkdir -p "$HOME/.local/share/godot/templates"
           for base in /root/.local/share/godot/templates /root/.local/share/godot/export_templates; do

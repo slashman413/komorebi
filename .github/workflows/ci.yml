@@ -22,14 +22,15 @@ jobs:
       - name: Provision export templates
         run: |
           set -eux
-          # Derive the template version from the installed engine so it can
-          # never drift from the barichello/godot-ci image again (tag 3.5
-          # ships 3.5.stable; hardcoding 3.5.2 found nothing). The template
-          # dir is the version string minus the trailing ".official":
-          #   godot --version  ->  3.5.stable.official
-          #   template dir     ->  3.5.stable
-          GODOT_FULL="$(godot --version)"
-          GODOT_TPL="${GODOT_FULL%.*}"
+          # Derive the template dir from the installed engine so it can never
+          # drift from the barichello/godot-ci image. godot --version prints
+          # e.g. "3.5.stable.official.991bb6ac7"; the template dir is the
+          # first three dot-separated fields ("3.5.stable"). --headless is
+          # required: without it godot tries to init a display and exits 255
+          # inside a container, which set -e would treat as a failure.
+          GODOT_FULL="$(godot --headless --version 2>/dev/null || true)"
+          GODOT_TPL="$(printf '%s' "$GODOT_FULL" | cut -d. -f1-3)"
+          [ -n "$GODOT_TPL" ] || { echo "::error::could not determine godot version"; exit 1; }
           echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
           mkdir -p "$HOME/.local/share/godot/templates"
           # Godot 3.x keeps templates under templates/, Godot 4.x under
@@ -107,11 +108,12 @@ jobs:
         run: |
           set -eux
           # Same self-healing provisioning as the import job: derive the
-          # template dir from the installed engine (godot --version ->
-          # 3.5.stable.official -> dir 3.5.stable) instead of hardcoding a
-          # version the image does not ship.
-          GODOT_FULL="$(godot --version)"
-          GODOT_TPL="${GODOT_FULL%.*}"
+          # template dir from the installed engine (godot --headless --version
+          # -> 3.5.stable.official.991bb6ac7 -> dir 3.5.stable) instead of
+          # hardcoding a version the image does not ship.
+          GODOT_FULL="$(godot --headless --version 2>/dev/null || true)"
+          GODOT_TPL="$(printf '%s' "$GODOT_FULL" | cut -d. -f1-3)"
+          [ -n "$GODOT_TPL" ] || { echo "::error::could not determine godot version"; exit 1; }
           echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
           mkdir -p "$HOME/.local/share/godot/templates"
           for base in /root/.local/share/godot/templates /root/.local/share/godot/export_templates; do
