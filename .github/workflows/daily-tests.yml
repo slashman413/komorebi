@@ -5,6 +5,10 @@ on:
     - cron: "0 2 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write   # REQUIRED — repo default token is read-only; failure-issue creation needs write (J2 handoff)
+
 env:
   GODOT_VERSION: "3.5.2"
 
@@ -99,4 +103,18 @@ jobs:
           path: report.md
           retention-days: 30
 
-      # --- Failure email step will be added by J5 ---
+      - name: Create failure issue
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            let report = "(no report available)";
+            try { report = fs.readFileSync("report.md", "utf8"); } catch(e) {}
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `⚠️ Daily tests FAILED — Run #${context.runNumber}`,
+              body: `Daily test run failed.\n\n**Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\n## Report\n\n${report}`,
+              labels: ["ci-failure", "daily-tests"]
+            });
