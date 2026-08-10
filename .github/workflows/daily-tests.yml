@@ -14,9 +14,6 @@ defaults:
   run:
     shell: bash
 
-env:
-  GODOT_VERSION: "3.5.2"
-
 jobs:
   daily-test-run:
     name: Daily Import + Parse Gate + Tests
@@ -29,14 +26,20 @@ jobs:
       - name: Provision export templates
         run: |
           set -eux
-          mkdir -p "$HOME/.local/share/godot/export_templates"
-          # barichello image ships templates under /root; move them where this
-          # job's HOME expects them (no-op/harmless if already colocated).
-          if [ -d "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" ]; then
-            cp -r "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
-                  "$HOME/.local/share/godot/export_templates/" || true
-          fi
-          ls -la "$HOME/.local/share/godot/export_templates/" || true
+          # Derive the template dir from the installed engine (godot --version
+          # -> 3.5.stable.official -> dir 3.5.stable). The image keeps Godot
+          # 3.x templates under templates/ (Godot 4.x: export_templates/).
+          GODOT_FULL="$(godot --version)"
+          GODOT_TPL="${GODOT_FULL%.*}"
+          echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
+          mkdir -p "$HOME/.local/share/godot/templates"
+          for base in /root/.local/share/godot/templates /root/.local/share/godot/export_templates; do
+            if [ -d "$base/$GODOT_TPL" ]; then
+              cp -r "$base/$GODOT_TPL" "$HOME/.local/share/godot/templates/" || true
+              break
+            fi
+          done
+          ls -la "$HOME/.local/share/godot/templates/" || true
 
       - name: Import project (populates .godot/, compiles scripts)
         run: |

@@ -6,9 +6,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  GODOT_VERSION: "3.5.2"
-
 jobs:
   # ---------------------------------------------------------------------------
   # Gate 1: import the project, prove every script parses, run headless tests.
@@ -25,14 +22,29 @@ jobs:
       - name: Provision export templates
         run: |
           set -eux
-          mkdir -p "$HOME/.local/share/godot/export_templates"
-          # barichello image ships templates under /root; move them where this
-          # job's HOME expects them (no-op/harmless if already colocated).
-          if [ -d "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" ]; then
-            cp -r "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
-                  "$HOME/.local/share/godot/export_templates/" || true
-          fi
-          ls -la "$HOME/.local/share/godot/export_templates/" || true
+          # Derive the template version from the installed engine so it can
+          # never drift from the barichello/godot-ci image again (tag 3.5
+          # ships 3.5.stable; hardcoding 3.5.2 found nothing). The template
+          # dir is the version string minus the trailing ".official":
+          #   godot --version  ->  3.5.stable.official
+          #   template dir     ->  3.5.stable
+          GODOT_FULL="$(godot --version)"
+          GODOT_TPL="${GODOT_FULL%.*}"
+          echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
+          mkdir -p "$HOME/.local/share/godot/templates"
+          # Godot 3.x keeps templates under templates/, Godot 4.x under
+          # export_templates/. The image has them under /root; this job's HOME
+          # (/github/home) is different, so copy them into place. Only one of
+          # the two layouts exists per engine, so probe both.
+          for base in /root/.local/share/godot/templates /root/.local/share/godot/export_templates; do
+            if [ -d "$base/$GODOT_TPL" ]; then
+              cp -r "$base/$GODOT_TPL" "$HOME/.local/share/godot/templates/" || true
+              break
+            fi
+          done
+          ls -la "$HOME/.local/share/godot/templates/" || true
+          test -d "$HOME/.local/share/godot/templates/$GODOT_TPL" \
+            || { echo "::error::export templates for ${GODOT_TPL} not found"; exit 1; }
 
       - name: Import project (populates .godot/, compiles scripts)
         run: |
@@ -94,13 +106,22 @@ jobs:
       - name: Provision export templates
         run: |
           set -eux
-          mkdir -p "$HOME/.local/share/godot/export_templates"
-          if [ -d "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" ]; then
-            cp -r "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
-                  "$HOME/.local/share/godot/export_templates/" || true
-          fi
-          test -d "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
-            || { echo "::error::export templates for ${GODOT_VERSION} not found"; exit 1; }
+          # Same self-healing provisioning as the import job: derive the
+          # template dir from the installed engine (godot --version ->
+          # 3.5.stable.official -> dir 3.5.stable) instead of hardcoding a
+          # version the image does not ship.
+          GODOT_FULL="$(godot --version)"
+          GODOT_TPL="${GODOT_FULL%.*}"
+          echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
+          mkdir -p "$HOME/.local/share/godot/templates"
+          for base in /root/.local/share/godot/templates /root/.local/share/godot/export_templates; do
+            if [ -d "$base/$GODOT_TPL" ]; then
+              cp -r "$base/$GODOT_TPL" "$HOME/.local/share/godot/templates/" || true
+              break
+            fi
+          done
+          test -d "$HOME/.local/share/godot/templates/$GODOT_TPL" \
+            || { echo "::error::export templates for ${GODOT_TPL} not found"; exit 1; }
 
       - name: Import project
         run: godot --headless --path . --import --quit
