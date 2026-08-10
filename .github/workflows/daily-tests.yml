@@ -32,6 +32,7 @@ jobs:
       - name: Import project (populates .godot/, compiles scripts)
         run: |
           set -eux
+          set -o pipefail
           godot --headless --path . --import 2>&1 | tee import.log
 
       - name: Parse gate (log scan backstop)
@@ -46,17 +47,56 @@ jobs:
       - name: Headless tests (exit code gates the job)
         run: |
           set -eux
-          godot --headless --path . --script res://tests/run_tests.gd
+          set -o pipefail
+          godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee test_results.log
 
       - name: HoldGraph Validator (exit code gates the job)
         run: |
           set -eux
-          godot --headless --path . --script res://tools/validate_hold_graph.gd
+          set -o pipefail
+          godot --headless --path . --script res://tools/validate_hold_graph.gd 2>&1 | tee holdgraph_results.log
 
       - name: Content Linter (exit code gates the job)
         run: |
           set -eux
-          godot --headless --path . --script res://tools/content_linter.gd
+          set -o pipefail
+          godot --headless --path . --script res://tools/content_linter.gd 2>&1 | tee linter_results.log
 
-      # --- Report generation step will be added by J4 ---
+      - name: Generate test report
+        if: always()
+        run: |
+          echo "# Daily Test Report" > report.md
+          echo "" >> report.md
+          echo "**Run:** ${{ github.run_id }}" >> report.md
+          echo "**Date:** $(date -u +"%Y-%m-%d %H:%M UTC")" >> report.md
+          echo "**Status:** ${{ job.status }}" >> report.md
+          echo "" >> report.md
+          echo "## Import + Parse Gate" >> report.md
+          echo "\`\`\`" >> report.md
+          tail -20 import.log >> report.md 2>/dev/null || echo "(no import log)" >> report.md
+          echo "\`\`\`" >> report.md
+          echo "" >> report.md
+          echo "## Headless Tests (run_tests.gd)" >> report.md
+          echo "\`\`\`" >> report.md
+          cat test_results.log >> report.md 2>/dev/null || echo "(no test log)" >> report.md
+          echo "\`\`\`" >> report.md
+          echo "" >> report.md
+          echo "## HoldGraph Validator" >> report.md
+          echo "\`\`\`" >> report.md
+          cat holdgraph_results.log >> report.md 2>/dev/null || echo "(no holdgraph log)" >> report.md
+          echo "\`\`\`" >> report.md
+          echo "" >> report.md
+          echo "## Content Linter" >> report.md
+          echo "\`\`\`" >> report.md
+          cat linter_results.log >> report.md 2>/dev/null || echo "(no linter log)" >> report.md
+          echo "\`\`\`" >> report.md
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-test-report-${{ github.run_id }}
+          path: report.md
+          retention-days: 30
+
       # --- Failure email step will be added by J5 ---
