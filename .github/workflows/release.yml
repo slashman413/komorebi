@@ -14,7 +14,6 @@ on:
   workflow_dispatch:
 
 env:
-  GODOT_VERSION: "4.3"
   ITCH_TARGET: "slashman413/komorebi"
 
 jobs:
@@ -22,7 +21,7 @@ jobs:
     name: Export + butler push
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.3
+      image: barichello/godot-ci:3.5
     strategy:
       matrix:
         include:
@@ -38,14 +37,28 @@ jobs:
       - name: Provision export templates
         run: |
           set -eux
-          mkdir -p "$HOME/.local/share/godot/export_templates"
-          if [ -d "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" ]; then
-            cp -r "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
-                  "$HOME/.local/share/godot/export_templates/" || true
-          fi
+          # Same self-healing provisioning as ci.yml: derive the template dir
+          # from the installed engine (godot --headless --version ->
+          # 3.5.stable.official.991bb6ac7 -> dir 3.5.stable) instead of
+          # hardcoding a version. Godot 3.x keeps templates under templates/;
+          # the image has them under /root, this job's HOME (/github/home)
+          # is different, so copy them into place.
+          GODOT_FULL="$(godot --headless --version 2>/dev/null || true)"
+          GODOT_TPL="$(printf '%s' "$GODOT_FULL" | cut -d. -f1-3)"
+          [ -n "$GODOT_TPL" ] || { echo "::error::could not determine godot version"; exit 1; }
+          echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
+          mkdir -p "$HOME/.local/share/godot/templates"
+          for base in /root/.local/share/godot/templates /root/.local/share/godot/export_templates; do
+            if [ -d "$base/$GODOT_TPL" ]; then
+              cp -r "$base/$GODOT_TPL" "$HOME/.local/share/godot/templates/" || true
+              break
+            fi
+          done
+          test -d "$HOME/.local/share/godot/templates/$GODOT_TPL" \
+            || { echo "::error::export templates for ${GODOT_TPL} not found"; exit 1; }
 
       - name: Import project
-        run: godot --headless --path . --import 2>&1 | tee import.log
+        run: godot --headless --path . --import --quit 2>&1 | tee import.log
 
       - name: Export ${{ matrix.preset }}
         env:
@@ -54,7 +67,9 @@ jobs:
         run: |
           set -eux
           mkdir -p build/"$PRESET"
-          godot --headless --path . --export-release "$PRESET" "build/$PRESET/$OUTFILE"
+          # Godot 3.x CLI uses `--export`; `--export-release` is Godot 4.x
+          # syntax that 3.x silently ignores (boots main scene -> hangs).
+          timeout 300 godot --headless --path . --export "$PRESET" "build/$PRESET/$OUTFILE"
           ls -la "build/$PRESET"
 
       - name: Publish to itch.io via butler

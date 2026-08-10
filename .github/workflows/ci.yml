@@ -132,8 +132,13 @@ jobs:
         run: |
           set -eux
           mkdir -p "build/${{ matrix.outdir }}"
-          godot --headless --path . \
-            --export-release "${{ matrix.preset }}" \
+          # Godot 3.x CLI uses `--export` (release template by default);
+          # `--export-release` is Godot 4.x syntax and is silently ignored
+          # by 3.x, which then boots the main scene and hangs forever.
+          # timeout is a hard backstop so a hang fails the job instead of
+          # zombie-ing until the 6h limit (same pattern as daily-tests.yml).
+          timeout 300 godot --headless --path . \
+            --export "${{ matrix.preset }}" \
             "build/${{ matrix.outdir }}/${{ matrix.binary }}"
           ls -la "build/${{ matrix.outdir }}"
 
