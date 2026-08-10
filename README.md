@@ -164,37 +164,31 @@ scheduled run.
 
 ---
 
-## ⚠️ Push + first-run status (read this)
+## ✅ Current status (2026-08-10 — final integration check)
 
-This increment was authored on a host with **no Godot binary and no target
-repository / push credentials**, so two things in the task's "Output" line could
-**not** be executed or verified from here and are left as the human/CI step:
+The daily CI pipeline is **live and E2E-verified** on GitHub:
 
-- **Code push** — there is no repo to push to yet. See "How to ship" below.
-- **A *proven* green pipeline** — CI is authored to pass, but has not been run,
-  because that requires the push above. First run is the source of truth.
+- **Repo:** `slashman413/komorebi` (public), default branch `master`. All pipeline
+  commits are pushed (`HEAD` == `origin/master`).
+- **Schedule armed:** `0 2 * * *` (02:00 UTC = 10:00 Taiwan time) on the default
+  branch, plus manual `workflow_dispatch`. The first *scheduled* run fires on the
+  next cron tick; the pipeline has already been proven end-to-end via
+  `workflow_dispatch` runs.
+- **Verified runs** (real GitHub runners, 2026-08-10):
+  - Green — https://github.com/slashman413/komorebi/actions/runs/31355277626
+    (success: 26 test checks, 6 HoldGraph checks, linter clean; report artifact
+    `daily-test-report-31355277626` uploaded).
+  - Forced-failure — https://github.com/slashman413/komorebi/actions/runs/31355405939
+    (failure at Content Linter; report STILL uploaded via `if: always()` and names
+    the failing suite). The forced failure was reverted; `master` is byte-identical
+    to the green state.
+- **Notification:** failure-only via GitHub's built-in Actions email — no custom
+  SMTP step, no secrets (see §4/§5 above).
 
-Everything that does not require a repo or a Godot binary is complete and
-self-consistent: locally-verifiable JSON/YAML is valid, the code is written to the
-project's typing/signal conventions, and the tests assert the SaveService and
-BreathModel invariants the task calls for.
-
-### How to ship (≈2 minutes)
-
-```bash
-cd komorebi
-git init -b main
-git add .
-git commit -m "Komorebi Increment 0: skeleton + breathing spike"
-gh repo create <owner>/komorebi --private --source=. --push   # or add a remote + push
-# Open the Actions tab and confirm the CI run goes green.
-```
-
-### One thing to sanity-check on first CI run
-
-`export_presets.cfg` is normally serialized by the Godot editor. The committed
-presets are hand-written and correct for the common case, but preset options can
-be version-sensitive. If the **export** job fails to find/serialize a preset,
-open the project once in the editor (`Project → Export`), confirm the **Linux**
-and **Windows Desktop** presets exist, save, and commit the regenerated file. The
-**import-and-test** gate does not depend on presets and should pass regardless.
+**Known follow-up (out of daily-tests scope):** the regular `ci.yml` **export**
+jobs fail at template provisioning (`GODOT_VERSION: "3.5.2"` vs the
+`barichello/godot-ci:3.5` image's 3.5.0 templates). The import-and-test gate
+(identical to daily-tests) is green. Candidate fix: set `GODOT_VERSION: "3.5"`
+after verifying `export_presets.cfg` compatibility. Do NOT merge the
+`ci-debug-import` band-aid branch (it removes pipefail and swallows timeouts);
+`master`'s `--import --quit` fix is the correct one.
