@@ -73,6 +73,7 @@ jobs:
         run: |
           set -eux
           set -o pipefail
+          exit 1 # FORCED FAILURE for J6 E2E evidence (temporary)
           godot --headless --path . --script res://tools/content_linter.gd 2>&1 | tee linter_results.log
 
       - name: Generate test report
