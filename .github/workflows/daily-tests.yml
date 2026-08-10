@@ -8,6 +8,12 @@ on:
 permissions:
   contents: read
 
+# Steps use `set -o pipefail` (to keep `| tee` from masking godot failures);
+# ubuntu-latest runners default to sh (dash), which rejects pipefail. Force bash.
+defaults:
+  run:
+    shell: bash
+
 env:
   GODOT_VERSION: "3.5.2"
 
