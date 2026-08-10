@@ -12,8 +12,8 @@ extends Node
 ## Lifetime: process-global. Holds no gameplay logic — pure data I/O so it can be
 ## instanced and tested without the tree (see tests/run_tests.gd).
 
-signal save_completed(ok: bool)
-signal load_completed(ok: bool, data: Dictionary)
+signal save_completed(ok)
+signal load_completed(ok, data)
 
 const SCHEMA_VERSION: int = 1
 const SAVE_PATH: String = "user://save.json"
@@ -37,66 +37,92 @@ static func default_save() -> Dictionary:
 
 ## Atomically persist [param data] to disk. Returns OK or a FAILED error code.
 ## Emits [signal save_completed].
-func write_save(data: Dictionary) -> Error:
+func write_save(data: Dictionary) -> int:
 	var payload: Dictionary = data.duplicate(true)
 	payload["schema_version"] = SCHEMA_VERSION # never trust the caller's version field
 
-	var tmp: FileAccess = FileAccess.open(TEMP_PATH, FileAccess.WRITE)
-	if tmp == null:
-		push_error("SaveService: cannot open temp file: %s" % error_string(FileAccess.get_open_error()))
-		save_completed.emit(false)
+	var tmp := File.new()
+	var open_err: int = tmp.open(TEMP_PATH, File.WRITE)
+	if open_err != OK:
+		push_error("SaveService: cannot open temp file: %s" % _error_name(open_err))
+		emit_signal("save_completed", false)
 		return FAILED
 
-	tmp.store_string(JSON.stringify(payload, "\t"))
+	tmp.store_string(JSON.print(payload, "	"))
 	tmp.flush() # push to the OS before we hand off the handle
 	tmp.close() # closing fsyncs and releases the handle so rename can succeed on Windows
 
 	# Atomic swap: rename() on the same filesystem is atomic, so a reader either
 	# sees the whole old file or the whole new one — never a torn write.
-	var dir: DirAccess = DirAccess.open("user://")
-	if dir == null:
-		push_error("SaveService: cannot open user:// dir")
-		save_completed.emit(false)
+	var dir := Directory.new()
+	var dir_err: int = dir.open("user://")
+	if dir_err != OK:
+		push_error("SaveService: cannot open user:// dir: %s" % _error_name(dir_err))
+		emit_signal("save_completed", false)
 		return FAILED
 
-	var err: Error = dir.rename(TEMP_PATH, SAVE_PATH)
+	var err: int = dir.rename(TEMP_PATH, SAVE_PATH)
 	if err != OK:
-		push_error("SaveService: atomic rename failed: %s" % error_string(err))
-		save_completed.emit(false)
+		push_error("SaveService: atomic rename failed: %s" % _error_name(err))
+		emit_signal("save_completed", false)
 		return err
 
-	save_completed.emit(true)
+	emit_signal("save_completed", true)
 	return OK
 
 ## Load and validate the save file. Missing file yields a fresh default (ok=true,
 ## first-run). Corrupt JSON or a bad schema yields ok=false + default data so the
 ## game can still boot. Emits [signal load_completed].
 func read_save() -> Dictionary:
-	if not FileAccess.file_exists(SAVE_PATH):
+	if not File.new().file_exists(SAVE_PATH):
 		var fresh: Dictionary = default_save()
-		load_completed.emit(true, fresh)
+		emit_signal("load_completed", true, fresh)
 		return fresh
 
-	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
-	if file == null:
-		push_error("SaveService: cannot read save: %s" % error_string(FileAccess.get_open_error()))
-		load_completed.emit(false, default_save())
+	var file := File.new()
+	var open_err: int = file.open(SAVE_PATH, File.READ)
+	if open_err != OK:
+		push_error("SaveService: cannot read save: %s" % _error_name(open_err))
+		emit_signal("load_completed", false, default_save())
 		return default_save()
 
 	var text: String = file.get_as_text()
 	file.close()
 
-	var parsed: Variant = JSON.parse_string(text)
+	var parsed = _parse_json(text)
 	if typeof(parsed) != TYPE_DICTIONARY:
 		push_error("SaveService: save is not a JSON object; ignoring.")
-		load_completed.emit(false, default_save())
+		emit_signal("load_completed", false, default_save())
 		return default_save()
 
 	var data: Dictionary = parsed
 	var migrated: Dictionary = _migrate(data)
 	var ok: bool = int(migrated.get("schema_version", -1)) == SCHEMA_VERSION
-	load_completed.emit(ok, migrated)
+	emit_signal("load_completed", ok, migrated)
 	return migrated
+
+## Godot 3.x JSON.parse returns a JSONParseResult; unwrap .result (no JSON.new()).
+func _parse_json(text: String):
+	var result: JSONParseResult = JSON.parse(text)
+	if result.error != OK:
+		return null
+	return result.result
+
+## Godot 3.x has no global error_string(); map the codes this service can hit.
+func _error_name(err: int) -> String:
+	match err:
+		OK: return "OK"
+		FAILED: return "FAILED"
+		ERR_FILE_NOT_FOUND: return "ERR_FILE_NOT_FOUND"
+		ERR_FILE_ALREADY_IN_USE: return "ERR_FILE_ALREADY_IN_USE"
+		ERR_CANT_OPEN: return "ERR_CANT_OPEN"
+		ERR_CANT_CREATE: return "ERR_CANT_CREATE"
+		ERR_FILE_CANT_WRITE: return "ERR_FILE_CANT_WRITE"
+		ERR_FILE_CANT_READ: return "ERR_FILE_CANT_READ"
+		ERR_INVALID_PARAMETER: return "ERR_INVALID_PARAMETER"
+		ERR_UNAUTHORIZED: return "ERR_UNAUTHORIZED"
+		_:
+			return "ERR_%d" % err
 
 ## Forward-migrate an older save to the current schema. Increment 0 only knows
 ## version 1, so this is a guard + a hook for the next increment. Unknown/newer

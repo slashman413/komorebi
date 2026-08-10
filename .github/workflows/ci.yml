@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  GODOT_VERSION: "4.3"
+  GODOT_VERSION: "3.5.2"
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -18,7 +18,7 @@ jobs:
     name: Import + Parse Gate + Tests
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.3
+      image: barichello/godot-ci:3.5
     steps:
       - uses: actions/checkout@v4
 
@@ -73,7 +73,7 @@ jobs:
     needs: import-and-test
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.3
+      image: barichello/godot-ci:3.5
     strategy:
       fail-fast: false
       matrix:

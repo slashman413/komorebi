@@ -1,8 +1,8 @@
-extends Node3D
+extends Spatial
 
-@onready var ecology_system = $EcologySystem
-@onready var soundscape_system = $SoundscapeSystem
-@onready var audio_director = $AudioDirector
+onready var ecology_system = $EcologySystem
+onready var soundscape_system = $SoundscapeSystem
+onready var audio_director = $AudioDirector
 
 func _ready() -> void:
 	print("[VerticalSlice] Level loaded.")
@@ -22,7 +22,7 @@ func _ready() -> void:
 	var spike_scene = load("res://spike/breathing_spike.tscn")
 	if spike_scene:
 		var canvas = CanvasLayer.new()
-		var spike_node = spike_scene.instantiate()
+		var spike_node = spike_scene.instance()
 		canvas.add_child(spike_node)
 		add_child(canvas)
 		if tel:
@@ -32,19 +32,25 @@ func _ready() -> void:
 	cta_canvas.layer = 100
 	var cta_box = HBoxContainer.new()
 	cta_box.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	cta_box.offset_bottom = -20
-	cta_box.offset_right = -20
+	cta_box.margin_bottom = -20
+	cta_box.margin_right = -20
 	cta_box.alignment = BoxContainer.ALIGNMENT_END
 
 	var wishlist_btn = Button.new()
 	wishlist_btn.text = "Wishlist on Steam"
-	wishlist_btn.pressed.connect(func(): OS.shell_open("steam://store/APPID"))
+	wishlist_btn.connect("pressed", self, "_on_wishlist_pressed")
 
 	var itch_btn = Button.new()
 	itch_btn.text = "Demo on itch.io"
-	itch_btn.pressed.connect(func(): OS.shell_open("https://slashman413.itch.io/komorebi"))
+	itch_btn.connect("pressed", self, "_on_itch_pressed")
 
 	cta_box.add_child(wishlist_btn)
 	cta_box.add_child(itch_btn)
 	cta_canvas.add_child(cta_box)
 	add_child(cta_canvas)
+
+func _on_wishlist_pressed() -> void:
+	OS.shell_open("steam://store/APPID")
+
+func _on_itch_pressed() -> void:
+	OS.shell_open("https://slashman413.itch.io/komorebi")

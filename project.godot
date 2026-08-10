@@ -1,21 +1,94 @@
 ; Engine configuration file.
-; Project Komorebi — Increment 0 (Skeleton + Breathing Spike)
-; Target: Godot 4.3+, Steam Deck (native 1280x800 @ 60 FPS).
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
-config_version=5
+config_version=4
+
+_global_script_classes=[ {
+"base": "Node",
+"class": "AudioDirector",
+"language": "GDScript",
+"path": "res://src/systems/audio_director.gd"
+}, {
+"base": "AudioStreamPlayer",
+"class": "BreathAudio",
+"language": "GDScript",
+"path": "res://spike/breath_audio.gd"
+}, {
+"base": "Node",
+"class": "BreathClock",
+"language": "GDScript",
+"path": "res://spike/breath_clock.gd"
+}, {
+"base": "Reference",
+"class": "BreathModel",
+"language": "GDScript",
+"path": "res://spike/breath_model.gd"
+}, {
+"base": "Node2D",
+"class": "BreathVisual",
+"language": "GDScript",
+"path": "res://spike/breath_visual.gd"
+}, {
+"base": "Camera",
+"class": "ClimbCamera",
+"language": "GDScript",
+"path": "res://src/systems/climb_camera.gd"
+}, {
+"base": "Spatial",
+"class": "ClimbHold",
+"language": "GDScript",
+"path": "res://src/nodes/climb_hold.gd"
+}, {
+"base": "Node",
+"class": "ClimbSystem",
+"language": "GDScript",
+"path": "res://src/systems/climb_system.gd"
+}, {
+"base": "Node",
+"class": "EcologySystem",
+"language": "GDScript",
+"path": "res://src/systems/ecology_system.gd"
+}, {
+"base": "Node",
+"class": "HapticProbe",
+"language": "GDScript",
+"path": "res://spike/haptic_probe.gd"
+}, {
+"base": "Node",
+"class": "SoundscapeSystem",
+"language": "GDScript",
+"path": "res://src/systems/soundscape_system.gd"
+} ]
+_global_script_class_icons={
+"AudioDirector": "",
+"BreathAudio": "",
+"BreathClock": "",
+"BreathModel": "",
+"BreathVisual": "",
+"ClimbCamera": "",
+"ClimbHold": "",
+"ClimbSystem": "",
+"EcologySystem": "",
+"HapticProbe": "",
+"SoundscapeSystem": ""
+}
 
 [application]
 
 config/name="Komorebi"
 config/description="4-7-8 breathing companion. Increment 0 de-risks haptic/audio/visual sync."
 run/main_scene="res://src/level/vertical_slice.tscn"
-config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
+config/features=PoolStringArray( "3.5", "GLES3" )
 run/max_fps=60
 
 [autoload]
 
-; Load order matters: leaf services first, GameDirector last so it can wire them.
 TelemetryService="*res://autoload/telemetry_service.gd"
 SaveService="*res://autoload/save_service.gd"
 SteamService="*res://autoload/steam_service.gd"
@@ -24,31 +97,23 @@ GameDirector="*res://autoload/game_director.gd"
 
 [debug]
 
-; Surface type/parse problems at import time so the CI parse gate can catch them.
-gdscript/warnings/enable=true
-gdscript/warnings/untyped_declaration=1
+gdscript/warnings/return_value_discarded=0
 gdscript/warnings/unsafe_property_access=1
 gdscript/warnings/unsafe_method_access=1
 gdscript/warnings/unsafe_cast=1
-gdscript/warnings/return_value_discarded=0
+gdscript/warnings/untyped_declaration=1
 
 [display]
 
-; Steam Deck native panel resolution.
+window/stretch/mode="2d"
+window/stretch/aspect="keep"
 window/size/viewport_width=1280
 window/size/viewport_height=800
-window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
-window/vsync/vsync_mode=1
 
 [input_devices]
 
-; Keep haptics available on the Deck's built-in controller.
 pointing/emulate_touch_from_mouse=true
 
 [rendering]
 
-; Compatibility renderer: safe for the Steam Deck APU and headless CI export.
-renderer/rendering_method="gl_compatibility"
-renderer/rendering_method.mobile="gl_compatibility"
-environment/defaults/default_clear_color=Color(0.086, 0.098, 0.129, 1)
+environment/defaults/default_clear_color=Color( 0.086, 0.098, 0.129, 1 )

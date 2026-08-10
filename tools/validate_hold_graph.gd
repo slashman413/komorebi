@@ -13,7 +13,7 @@ func _init() -> void:
 		quit(1)
 		return
 		
-	var root = scene.instantiate()
+	var root = scene.instance()
 	_validate_graph(root)
 	
 	print("-----------------------------------")
@@ -42,7 +42,7 @@ func _validate_graph(root: Node) -> void:
 			rest_points += 1
 			
 		var connections = hold.get_connected_nodes()
-		if connections.is_empty():
+		if connections.empty():
 			# It's possible for an endpoint to have no OUTGOING connections,
 			# but we should ensure at least one incoming or outgoing if we want a fully connected graph.
 			pass
@@ -53,11 +53,11 @@ func _validate_graph(root: Node) -> void:
 
 	_check(rest_points >= 2, "Scene contains at least 2 rest points (found %d)" % rest_points)
 
-const ClimbHold = preload("res://src/nodes/climb_hold.gd")
+const ClimbHoldScript := preload("res://src/nodes/climb_hold.gd")
 
 func _find_all_holds(node: Node) -> Array:
 	var result = []
-	if node is ClimbHold:
+	if node is ClimbHoldScript:
 		result.append(node)
 	for child in node.get_children():
 		result.append_array(_find_all_holds(child))

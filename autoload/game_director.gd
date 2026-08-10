@@ -8,11 +8,11 @@ extends Node
 ## and the pure BreathModel. Loaded last (see project.godot [autoload]) so every
 ## other service exists when it runs.
 
-signal state_changed(new_state: State)
+signal state_changed(new_state)
 
 enum State { BOOT, SPIKE, PAUSED }
 
-var state: State = State.BOOT
+var state = State.BOOT
 var save_data: Dictionary = {}
 
 func _ready() -> void:
@@ -24,15 +24,15 @@ func _ready() -> void:
 	])
 
 	# Wire cross-cutting input intents once, centrally.
-	InputRouter.pause_requested.connect(_on_pause_requested)
+	InputRouter.connect("pause_requested", self, "_on_pause_requested")
 
 	_set_state(State.SPIKE)
 
-func _set_state(new_state: State) -> void:
+func _set_state(new_state) -> void:
 	if new_state == state:
 		return
 	state = new_state
-	state_changed.emit(state)
+	emit_signal("state_changed", state)
 
 func _on_pause_requested() -> void:
 	_set_state(State.PAUSED if state != State.PAUSED else State.SPIKE)
