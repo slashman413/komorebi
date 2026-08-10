@@ -21,7 +21,6 @@ func _init() -> void:
 	_test_breath_model()
 	_test_save_service_roundtrip()
 	_test_save_service_fixture()
-	_check(false, "GAP4-E2E deliberate forced failure (temporary)")
 
 	print("-----------------------------------")
 	if _failures == 0:
