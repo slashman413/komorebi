@@ -145,11 +145,10 @@ Every run — **success or failure** — generates and uploads a report:
 ### 5. Secrets
 
 **The workflow uses no secrets at all** — failure notification rides on GitHub's
-built-in Actions email, and the test gate itself needs no credentials. There is
-nothing to configure under Settings → Secrets and variables → Actions. (An earlier
-revision created a GitHub issue on failure via `actions/github-script@v7` with
-`permissions: issues: write`; that step and the extra permission were removed
-because they are redundant with GitHub's built-in notification.)
+built-in Actions email (sent automatically to the repository owners), and the
+test gate itself needs no credentials. There is nothing to configure under
+Settings → Secrets and variables → Actions, and no custom configuration in the
+workflow.
 
 ### 6. Manual trigger
 
