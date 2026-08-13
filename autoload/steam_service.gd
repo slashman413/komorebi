@@ -50,3 +50,12 @@ func resolve_cloud_conflict(local_time: int, cloud_time: int) -> String:
 		return "local"
 	print("[SteamService] Resolving cloud conflict: keeping CLOUD save.")
 	return "cloud"
+
+func open_wishlist() -> void:
+	if available and Engine.has_singleton("Steam"):
+		var steam = Engine.get_singleton("Steam")
+		# Opens the overlay to your game's store page
+		steam.activateGameOverlayToStore(app_id, 0) # 0 is FLAG_NONE
+	else:
+		# Fallback for non-Steam builds
+		OS.shell_open("https://store.steampowered.com/app/" + str(app_id))

@@ -41,27 +41,27 @@ func write_save(data: Dictionary) -> int:
 	var payload: Dictionary = data.duplicate(true)
 	payload["schema_version"] = SCHEMA_VERSION # never trust the caller's version field
 
-	var tmp := File.new()
-	var open_err: int = tmp.open(TEMP_PATH, File.WRITE)
-	if open_err != OK:
+	var tmp = FileAccess.open(TEMP_PATH, FileAccess.WRITE)
+	if tmp == null:
+		var open_err = FileAccess.get_open_error()
 		push_error("SaveService: cannot open temp file: %s" % _error_name(open_err))
 		emit_signal("save_completed", false)
 		return FAILED
 
-	tmp.store_string(JSON.print(payload, "	"))
+	tmp.store_string(JSON.stringify(payload, "	"))
 	tmp.flush() # push to the OS before we hand off the handle
 	tmp.close() # closing fsyncs and releases the handle so rename can succeed on Windows
 
 	# Atomic swap: rename() on the same filesystem is atomic, so a reader either
 	# sees the whole old file or the whole new one — never a torn write.
-	var dir := Directory.new()
-	var dir_err: int = dir.open("user://")
-	if dir_err != OK:
+	var dir = DirAccess.open("user://")
+	if dir == null:
+		var dir_err = DirAccess.get_open_error()
 		push_error("SaveService: cannot open user:// dir: %s" % _error_name(dir_err))
 		emit_signal("save_completed", false)
 		return FAILED
 
-	var err: int = dir.rename(TEMP_PATH, SAVE_PATH)
+	var err: int = dir.rename(ProjectSettings.globalize_path(TEMP_PATH), ProjectSettings.globalize_path(SAVE_PATH))
 	if err != OK:
 		push_error("SaveService: atomic rename failed: %s" % _error_name(err))
 		emit_signal("save_completed", false)
@@ -74,14 +74,14 @@ func write_save(data: Dictionary) -> int:
 ## first-run). Corrupt JSON or a bad schema yields ok=false + default data so the
 ## game can still boot. Emits [signal load_completed].
 func read_save() -> Dictionary:
-	if not File.new().file_exists(SAVE_PATH):
+	if not FileAccess.file_exists(SAVE_PATH):
 		var fresh: Dictionary = default_save()
 		emit_signal("load_completed", true, fresh)
 		return fresh
 
-	var file := File.new()
-	var open_err: int = file.open(SAVE_PATH, File.READ)
-	if open_err != OK:
+	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if file == null:
+		var open_err = FileAccess.get_open_error()
 		push_error("SaveService: cannot read save: %s" % _error_name(open_err))
 		emit_signal("load_completed", false, default_save())
 		return default_save()
@@ -103,10 +103,8 @@ func read_save() -> Dictionary:
 
 ## Godot 3.x JSON.parse returns a JSONParseResult; unwrap .result (no JSON.new()).
 func _parse_json(text: String):
-	var result: JSONParseResult = JSON.parse(text)
-	if result.error != OK:
-		return null
-	return result.result
+	var result = JSON.parse_string(text)
+	return result
 
 ## Godot 3.x has no global error_string(); map the codes this service can hit.
 func _error_name(err: int) -> String:

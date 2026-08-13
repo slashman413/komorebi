@@ -192,3 +192,8 @@ jobs fail at template provisioning (`GODOT_VERSION: "3.5.2"` vs the
 after verifying `export_presets.cfg` compatibility. Do NOT merge the
 `ci-debug-import` band-aid branch (it removes pipefail and swallows timeouts);
 `master`'s `--import --quit` fix is the correct one.
+
+
+---
+## 🚀 Automate Your Workflow
+Enjoying this tool? Join our [weekly newsletter](https://slashmantools.us/newsletter/?utm_source=github&utm_medium=readme) to get AI tools, automation tips, and digital product strategies directly in your inbox. No spam, just pure value.

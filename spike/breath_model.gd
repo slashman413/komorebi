@@ -1,5 +1,5 @@
 class_name BreathModel
-extends Reference
+extends RefCounted
 
 enum Phase { INHALE, HOLD, EXHALE }
 

@@ -21,7 +21,7 @@ jobs:
     name: Export + butler push
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:3.5
+      image: barichello/godot-ci:4.3
     strategy:
       matrix:
         include:
@@ -58,7 +58,7 @@ jobs:
             || { echo "::error::export templates for ${GODOT_TPL} not found"; exit 1; }
 
       - name: Import project
-        run: godot --headless --path . --import --quit 2>&1 | tee import.log
+        run: godot --headless --editor --quit 2>&1 | tee import.log
 
       - name: Export ${{ matrix.preset }}
         env:
@@ -69,7 +69,7 @@ jobs:
           mkdir -p build/"$PRESET"
           # Godot 3.x CLI uses `--export`; `--export-release` is Godot 4.x
           # syntax that 3.x silently ignores (boots main scene -> hangs).
-          timeout 300 godot --headless --path . --export "$PRESET" "build/$PRESET/$OUTFILE"
+          timeout 300 godot --headless --path . --export-release "$PRESET" "build/$PRESET/$OUTFILE"
           ls -la "build/$PRESET"
 
       - name: Publish to itch.io via butler

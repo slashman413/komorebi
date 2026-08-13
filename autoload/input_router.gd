@@ -18,9 +18,9 @@ var using_gamepad: bool = false
 func _ready() -> void:
 	# Register fallback actions if the project didn't define them, so the spike
 	# runs standalone (F6) and in a fresh checkout without an InputMap.
-	_ensure_action("komorebi_pause", KEY_ESCAPE, JOY_START)
-	_ensure_action("komorebi_confirm", KEY_ENTER, JOY_XBOX_A)
-	using_gamepad = not Input.get_connected_joypads().empty()
+	_ensure_action("komorebi_pause", KEY_ESCAPE, JOY_BUTTON_START)
+	_ensure_action("komorebi_confirm", KEY_ENTER, JOY_BUTTON_A)
+	using_gamepad = not Input.get_connected_joypads().is_empty()
 
 func _unhandled_input(event: InputEvent) -> void:
 	_update_device_kind(event)
@@ -44,8 +44,8 @@ func _ensure_action(action, key: int, pad_button: int) -> void:
 		return
 	InputMap.add_action(action)
 	var key_event: InputEventKey = InputEventKey.new()
-	key_event.scancode = key
+	key_event.physical_keycode = key
 	InputMap.action_add_event(action, key_event)
 	var pad_event: InputEventJoypadButton = InputEventJoypadButton.new()
-	pad_event.button_index = pad_button
+	pad_event.button_index = pad_button as JoyButton
 	InputMap.action_add_event(action, pad_event)

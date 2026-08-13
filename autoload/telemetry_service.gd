@@ -9,7 +9,7 @@ var breathing_sessions: int = 0
 
 func _ready() -> void:
 	print("[TelemetryService] Initialized.")
-	session_start_time = OS.get_ticks_msec()
+	session_start_time = Time.get_ticks_msec()
 
 func enable_telemetry(enabled: bool) -> void:
 	opt_in = enabled
@@ -26,5 +26,5 @@ func track_breathing_engaged() -> void:
 
 func _exit_tree() -> void:
 	if not opt_in: return
-	var session_length = (OS.get_ticks_msec() - session_start_time) / 1000.0
+	var session_length = (Time.get_ticks_msec() - session_start_time) / 1000.0
 	print("[TelemetryService] EVENT: session_ended | Length: ", session_length, "s")
