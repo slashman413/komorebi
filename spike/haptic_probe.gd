@@ -10,26 +10,26 @@ extends Node
 ## Event-driven: it listens to BreathClock.phase_changed (NOT per frame), so the
 ## rumble pattern is locked to the same clock as the visual and audio.
 
-export var clock_path: NodePath
+@export var clock_path: NodePath
 
 var has_haptics: bool = false
 var enabled: bool = true
 
 var _device: int = -1
 
-onready var _clock: BreathClock = get_node(clock_path) as BreathClock
+@onready var _clock: BreathClock = get_node(clock_path) as BreathClock
 
 func _ready() -> void:
 	_probe()
-	Input.connect("joy_connection_changed", self, "_on_joy_connection_changed")
+	Input.joy_connection_changed.connect(_on_joy_connection_changed)
 	if _clock != null:
-		_clock.connect("phase_changed", self, "_on_phase_changed")
+		_clock.phase_changed.connect(_on_phase_changed)
 	else:
 		push_error("HapticProbe: clock_path did not resolve to a BreathClock.")
 
 func _probe() -> void:
-	var pads: PoolIntArray = Input.get_connected_joypads()
-	if pads.empty():
+	var pads: Array[int] = Input.get_connected_joypads()
+	if pads.is_empty():
 		has_haptics = false
 		_device = -1
 	else:

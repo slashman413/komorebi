@@ -1,8 +1,8 @@
-extends Spatial
+extends Node3D
 
-onready var ecology_system = $EcologySystem
-onready var soundscape_system = $SoundscapeSystem
-onready var audio_director = $AudioDirector
+@onready var ecology_system = $EcologySystem
+@onready var soundscape_system = $SoundscapeSystem
+@onready var audio_director = $AudioDirector
 
 func _ready() -> void:
 	print("[VerticalSlice] Level loaded.")
@@ -34,15 +34,15 @@ func _ready() -> void:
 	cta_box.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	cta_box.margin_bottom = -20
 	cta_box.margin_right = -20
-	cta_box.alignment = BoxContainer.ALIGN_END
+	cta_box.alignment = BoxContainer.ALIGNMENT_END
 
 	var wishlist_btn = Button.new()
 	wishlist_btn.text = "Wishlist on Steam"
-	wishlist_btn.connect("pressed", self, "_on_wishlist_pressed")
+	wishlist_btn.pressed.connect(_on_wishlist_pressed)
 
 	var itch_btn = Button.new()
 	itch_btn.text = "Demo on itch.io"
-	itch_btn.connect("pressed", self, "_on_itch_pressed")
+	itch_btn.pressed.connect(_on_itch_pressed)
 
 	cta_box.add_child(wishlist_btn)
 	cta_box.add_child(itch_btn)

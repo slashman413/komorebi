@@ -11,22 +11,22 @@ extends CanvasLayer
 ## If the frame clock and wall clock diverge under load, we see it here instead of
 ## discovering desynced breathing months later. Toggle with F3.
 
-export var clock_path: NodePath
-export var haptic_path: NodePath
+@export var clock_path: NodePath
+@export var haptic_path: NodePath
 
 var _peak_drift_ms: float = 0.0
 
-onready var _clock: BreathClock = get_node(clock_path) as BreathClock
-onready var _haptics: HapticProbe = get_node(haptic_path) as HapticProbe if not haptic_path.is_empty() else null
-onready var _label: Label = $Panel/Label
+@onready var _clock: BreathClock = get_node(clock_path) as BreathClock
+@onready var _haptics: HapticProbe = get_node(haptic_path) as HapticProbe if not haptic_path.is_empty() else null
+@onready var _label: Label = $Panel/Label
 
 func _ready() -> void:
 	if _clock == null:
 		push_error("DriftOverlay: clock_path did not resolve to a BreathClock.")
 		return
-	_clock.connect("breath_tick", self, "_on_breath_tick")
+	_clock.breath_tick.connect(_on_breath_tick)
 
-func _unhandled_key_input(event: InputEventKey) -> void:
+func _unhandled_key_input(event: InputEvent) -> void:
 	if event.pressed and event.scancode == KEY_F3:
 		visible = not visible
 

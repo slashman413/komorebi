@@ -4,11 +4,11 @@ extends Node2D
 ## and lets the child components wire themselves to the single BreathClock via
 ## their exported clock paths. No breathing logic lives here.
 
-onready var _visual: BreathVisual = $BreathVisual
+@onready var _visual: BreathVisual = $BreathVisual
 
 func _ready() -> void:
 	_center_visual()
-	get_viewport().connect("size_changed", self, "_center_visual")
+	get_viewport().size_changed.connect(_center_visual)
 
 func _center_visual() -> void:
 	if _visual != null:

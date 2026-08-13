@@ -2,8 +2,8 @@ extends SceneTree
 
 func _init() -> void:
 	print("Running Content Linter...")
-	var file := File.new()
-	if file.open("res://src/locale/locale_table.csv", File.READ) != OK:
+	var file := FileAccess.open("res://src/locale/locale_table.csv", FileAccess.READ)
+	if file == null:
 		printerr("Failed to open locale_table.csv")
 		quit(1)
 		return
@@ -18,7 +18,7 @@ func _init() -> void:
 	var has_error = false
 	while not file.eof_reached():
 		var row = file.get_csv_line()
-		if row.size() <= 1 and row[0].empty():
+		if row.size() <= 1 and row[0].is_empty():
 			continue # skip empty trailing line
 			
 		line_count += 1
@@ -26,7 +26,7 @@ func _init() -> void:
 			printerr("Line ", line_count, " does not have 3 columns: ", row)
 			has_error = true
 			
-		if row[0].empty():
+		if row[0].is_empty():
 			printerr("Line ", line_count, " missing ID.")
 			has_error = true
 			

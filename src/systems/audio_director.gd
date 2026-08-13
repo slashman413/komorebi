@@ -13,7 +13,7 @@ func _ready() -> void:
 
 func bind_ecology_system(ecology_system: Node) -> void:
 	if ecology_system.has_signal("vitality_changed"):
-		ecology_system.connect("vitality_changed", self, "_on_vitality_changed")
+		ecology_system.vitality_changed.connect(_on_vitality_changed)
 		print("[AudioDirector] Bound to EcologySystem vitality_changed signal.")
 
 func _on_vitality_changed(vitality: float) -> void:

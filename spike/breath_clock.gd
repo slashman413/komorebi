@@ -25,7 +25,7 @@ var _last_phase: int = BreathModel.Phase.INHALE
 var _initialized: bool = false
 
 func _ready() -> void:
-	_start_usec = OS.get_ticks_usec()
+	_start_usec = Time.get_ticks_usec()
 	_initialized = true
 
 func _process(delta: float) -> void:
@@ -55,7 +55,7 @@ func elapsed() -> float:
 func real_seconds() -> float:
 	if not _initialized:
 		return 0.0
-	return float(OS.get_ticks_usec() - _start_usec) / 1_000_000.0
+	return float(Time.get_ticks_usec() - _start_usec) / 1_000_000.0
 
 ## Signed drift in seconds: (frame clock) - (wall clock). ~0 means perfect sync.
 func drift_seconds() -> float:
@@ -63,5 +63,5 @@ func drift_seconds() -> float:
 
 func reset() -> void:
 	_elapsed = 0.0
-	_start_usec = OS.get_ticks_usec()
+	_start_usec = Time.get_ticks_usec()
 	_last_phase = BreathModel.Phase.INHALE
