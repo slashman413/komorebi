@@ -3,17 +3,17 @@ extends Node
 
 ## AudioDirector: handles adaptive layering on vitality_changed
 
-@export var haptics_enabled: bool = true
+export var haptics_enabled: bool = true
 
 func _ready() -> void:
 	print("[AudioDirector] Initialized.")
 	var clock = get_node_or_null("/root/BreathClock")
 	if clock:
-		clock.phase_changed.connect(_on_phase_changed)
+		clock.connect("phase_changed", self, "_on_phase_changed")
 
 func bind_ecology_system(ecology_system: Node) -> void:
 	if ecology_system.has_signal("vitality_changed"):
-		ecology_system.vitality_changed.connect(_on_vitality_changed)
+		ecology_system.connect("vitality_changed", self, "_on_vitality_changed")
 		print("[AudioDirector] Bound to EcologySystem vitality_changed signal.")
 
 func _on_vitality_changed(vitality: float) -> void:

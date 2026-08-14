@@ -24,7 +24,7 @@ func _ready() -> void:
 	])
 
 	# Wire cross-cutting input intents once, centrally.
-	InputRouter.pause_requested.connect(_on_pause_requested)
+	InputRouter.connect("pause_requested", self, "_on_pause_requested")
 
 	_set_state(State.SPIKE)
 
