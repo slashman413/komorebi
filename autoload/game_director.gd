@@ -16,6 +16,10 @@ var state = State.BOOT
 var save_data: Dictionary = {}
 
 func _ready() -> void:
+	# The app state machine must keep running while the tree is paused so it can
+	# process the resume request that lifts the pause (see _on_pause_requested).
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
 	# Load persisted data through SaveService (autoload, loaded before us).
 	save_data = SaveService.read_save()
 	print("[GameDirector] boot. schema_version=%d sessions=%d" % [

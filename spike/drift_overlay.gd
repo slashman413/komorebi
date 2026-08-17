@@ -27,7 +27,7 @@ func _ready() -> void:
 	_clock.breath_tick.connect(_on_breath_tick)
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event.pressed and event.scancode == KEY_F3:
+	if event.pressed and event.keycode == KEY_F3:
 		visible = not visible
 
 func _on_breath_tick(phase: int, phase_progress: float, amplitude: float, _cycle_time: float) -> void:

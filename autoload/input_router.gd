@@ -16,6 +16,12 @@ signal device_kind_changed(using_gamepad)
 var using_gamepad: bool = false
 
 func _ready() -> void:
+	# Keep routing input even when the tree is paused. Without this, a paused game
+	# stops delivering _unhandled_input to this (default-pausable) autoload, so the
+	# "pause" action could never be pressed again to resume — a hard soft-lock on
+	# both ESC and gamepad START.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
 	# Register fallback actions if the project didn't define them, so the spike
 	# runs standalone (F6) and in a fresh checkout without an InputMap.
 	_ensure_action("komorebi_pause", KEY_ESCAPE, JOY_BUTTON_START)

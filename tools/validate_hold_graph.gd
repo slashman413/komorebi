@@ -14,11 +14,18 @@ func _init() -> void:
 		_failures += 1
 		quit(1)
 		return
-		
+
+	# NOTE: we deliberately do NOT add scene_root to the SceneTree. When running
+	# as a headless `--script` main loop, add_child() does not synchronously mark
+	# nodes is_inside_tree() (that happens on the first idle frame), so
+	# global_transform would return identity and every hold distance would read
+	# 0.00 — making the reachability check vacuous. Instead we read positions via
+	# _world_origin(), which composes the instanced subtree's local transforms and
+	# needs no live tree. Relative NodePaths (../HoldN) still resolve because the
+	# parent/child links exist on the detached instance.
 	var scene_root = scene.instantiate()
-	self.root.add_child(scene_root)
 	_validate_graph(scene_root)
-	scene_root.queue_free()
+	scene_root.free()
 	
 	print("-----------------------------------")
 	if _failures == 0:
@@ -27,6 +34,17 @@ func _init() -> void:
 	else:
 		printerr("FAIL — %d checks, %d failure(s)" % [_checks, _failures])
 		quit(1)
+
+# World-space origin of a Node3D, composed from local transforms up to the
+# instanced subtree root. Tree-independent, so it is correct even when the node
+# is not is_inside_tree() (see the note in _init()).
+func _world_origin(node: Node3D) -> Vector3:
+	var t := Transform3D()
+	var n: Node = node
+	while n != null and n is Node3D:
+		t = (n as Node3D).transform * t
+		n = n.get_parent()
+	return t.origin
 
 func _check(condition: bool, label: String) -> void:
 	_checks += 1
@@ -51,7 +69,7 @@ func _validate_graph(root: Node) -> void:
 			
 		var connections = hold.get_connected_nodes()
 		for target in connections:
-			var dist = hold.global_transform.origin.distance_to(target.global_transform.origin)
+			var dist = _world_origin(hold).distance_to(_world_origin(target))
 			_check(dist <= 2.5, "Hold %s connected to %s is within MAX_REACH (dist: %.2f)" % [hold.name, target.name, dist])
 
 	_check(rest_nodes.size() >= 2, "Scene contains at least 2 rest points (found %d)" % rest_nodes.size())
@@ -62,7 +80,7 @@ func _validate_graph(root: Node) -> void:
 		for target_rest in reachable_rests:
 			var path_dist = reachable_rests[target_rest]
 			_check(path_dist <= max_distance, 
-				"Path from %s to %s is possible within a breath cycle (dist: %.2f, max: %.2f)" % 
+				"Path from %s to %s is possible within a breath cycle (dist: %.2f, max: %.2f)" %
 				[rest_node.name, target_rest.name, path_dist, max_distance])
 
 func _find_paths_to_other_rests(start_node: Node) -> Dictionary:
@@ -96,7 +114,7 @@ func _find_paths_to_other_rests(start_node: Node) -> Dictionary:
 			
 		var connections = current_node.get_connected_nodes()
 		for target in connections:
-			var edge_dist = current_node.global_transform.origin.distance_to(target.global_transform.origin)
+			var edge_dist = _world_origin(current_node).distance_to(_world_origin(target))
 			var new_dist = current_dist + edge_dist
 			
 			if not distances.has(target) or new_dist < distances[target]:

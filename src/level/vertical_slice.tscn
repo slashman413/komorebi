@@ -5,7 +5,7 @@
 [ext_resource path="res://src/systems/audio_director.gd" type="Script" id=3]
 [ext_resource path="res://src/level/vertical_slice.gd" type="Script" id=4]
 
-[node name="VerticalSlice" type="Spatial"]
+[node name="VerticalSlice" type="Node3D"]
 script = ExtResource(4)
 
 [node name="EcologySystem" type="Node" parent="."]
@@ -18,7 +18,7 @@ script = ExtResource(2)
 script = ExtResource(3)
 
 [node name="OnboardingInstruction" type="Label3D" parent="."]
-transform = Transform(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -3)
-text = "Breathe in. Breathe out."
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -3)
+text = "level_intro"
 font_size = 64
 outline_size = 8

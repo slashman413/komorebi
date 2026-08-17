@@ -22,7 +22,7 @@ func _ready() -> void:
 	var spike_scene = load("res://spike/breathing_spike.tscn")
 	if spike_scene:
 		var canvas = CanvasLayer.new()
-		var spike_node = spike_scene.instance()
+		var spike_node = spike_scene.instantiate()
 		canvas.add_child(spike_node)
 		add_child(canvas)
 		if tel:
@@ -32,16 +32,18 @@ func _ready() -> void:
 	cta_canvas.layer = 100
 	var cta_box = HBoxContainer.new()
 	cta_box.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	cta_box.margin_bottom = -20
-	cta_box.margin_right = -20
+	cta_box.offset_bottom = -20
+	cta_box.offset_right = -20
 	cta_box.alignment = BoxContainer.ALIGNMENT_END
 
 	var wishlist_btn = Button.new()
-	wishlist_btn.text = "Wishlist on Steam"
+	# Localization keys resolve via the automatic translation system (see
+	# locale_table.csv / [internationalization] in project.godot).
+	wishlist_btn.text = "ui_wishlist"
 	wishlist_btn.pressed.connect(_on_wishlist_pressed)
 
 	var itch_btn = Button.new()
-	itch_btn.text = "Demo on itch.io"
+	itch_btn.text = "ui_demo"
 	itch_btn.pressed.connect(_on_itch_pressed)
 
 	cta_box.add_child(wishlist_btn)

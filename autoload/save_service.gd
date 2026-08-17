@@ -101,7 +101,7 @@ func read_save() -> Dictionary:
 	emit_signal("load_completed", ok, migrated)
 	return migrated
 
-## Godot 3.x JSON.parse returns a JSONParseResult; unwrap .result (no JSON.new()).
+## Godot 4: JSON.parse_string returns the parsed Variant (or null on error).
 func _parse_json(text: String):
 	var result = JSON.parse_string(text)
 	return result

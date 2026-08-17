@@ -3,3 +3,6 @@ ui_start,Start,开始
 ui_options,Options,选项
 ui_quit,Quit,退出
 level_intro,"Breathe in. Breathe out.","吸气。呼气。"
+ui_wishlist,Wishlist on Steam,加入 Steam 愿望单
+ui_demo,Demo on itch.io,在 itch.io 试玩
+spike_title,KOMOREBI · Breathing Spike,KOMOREBI · 呼吸原型

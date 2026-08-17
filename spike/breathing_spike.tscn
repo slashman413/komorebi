@@ -31,14 +31,14 @@ clock_path = NodePath("../BreathClock")
 haptic_path = NodePath("../HapticProbe")
 
 [node name="Panel" type="Panel" parent="DriftOverlay"]
-margin_left = 16.0
-margin_top = 16.0
-margin_right = 560.0
-margin_bottom = 232.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 560.0
+offset_bottom = 232.0
 
 [node name="Label" type="Label" parent="DriftOverlay/Panel"]
-margin_left = 14.0
-margin_top = 10.0
-margin_right = 544.0
-margin_bottom = 216.0
-text = "KOMOREBI · Breathing Spike"
+offset_left = 14.0
+offset_top = 10.0
+offset_right = 544.0
+offset_bottom = 216.0
+text = "spike_title"
