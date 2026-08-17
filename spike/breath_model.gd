@@ -56,8 +56,8 @@ static func amplitude(cycle_time: float) -> float:
 static func phase_label(phase: int) -> String:
 	match phase:
 		Phase.INHALE:
-			return "Inhale"
+			return TranslationServer.translate("phase_inhale")
 		Phase.HOLD:
-			return "Hold"
+			return TranslationServer.translate("phase_hold")
 		_:
-			return "Exhale"
+			return TranslationServer.translate("phase_exhale")

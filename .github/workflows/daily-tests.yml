@@ -80,6 +80,18 @@ jobs:
           set -o pipefail
           godot --headless --path . --script res://tools/content_linter.gd 2>&1 | tee linter_results.log
 
+      - name: i18n Validator (exit code gates the job)
+        run: |
+          set -eux
+          set -o pipefail
+          godot --headless --path . --script res://tools/validate_i18n.gd 2>&1 | tee i18n_results.log
+
+      - name: Localization Probe (exit code gates the job)
+        run: |
+          set -eux
+          set -o pipefail
+          godot --headless --path . --script res://tests/localization_probe.gd 2>&1 | tee locprobe_results.log
+
       - name: Generate test report
         if: always()
         run: |
@@ -107,6 +119,16 @@ jobs:
           echo "## Content Linter" >> report.md
           echo "\`\`\`" >> report.md
           cat linter_results.log >> report.md 2>/dev/null || echo "(no linter log)" >> report.md
+          echo "\`\`\`" >> report.md
+          echo "" >> report.md
+          echo "## i18n Validator" >> report.md
+          echo "\`\`\`" >> report.md
+          cat i18n_results.log >> report.md 2>/dev/null || echo "(no i18n log)" >> report.md
+          echo "\`\`\`" >> report.md
+          echo "" >> report.md
+          echo "## Localization Probe" >> report.md
+          echo "\`\`\`" >> report.md
+          cat locprobe_results.log >> report.md 2>/dev/null || echo "(no localization probe log)" >> report.md
           echo "\`\`\`" >> report.md
 
       - name: Upload test report

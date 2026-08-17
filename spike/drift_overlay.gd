@@ -35,14 +35,16 @@ func _on_breath_tick(phase: int, phase_progress: float, amplitude: float, _cycle
 	if abs(drift_ms) > abs(_peak_drift_ms):
 		_peak_drift_ms = drift_ms
 
+	var haptic_label: String = tr("drift_haptics_available") if _haptics != null and _haptics.has_haptics else tr("drift_haptics_unavailable")
+
 	_label.text = "\n".join([
-		"KOMOREBI · Breathing Spike (drift overlay — F3 to hide)",
+		tr("drift_header"),
 		"",
-		"FPS          : %5.1f  (target 60)" % Engine.get_frames_per_second(),
-		"phase        : %-6s  %3d%%" % [BreathModel.phase_label(phase), int(phase_progress * 100.0)],
-		"amplitude    : %4.2f" % amplitude,
-		"clock (frame): %8.3f s" % _clock.elapsed(),
-		"clock (wall) : %8.3f s" % _clock.real_seconds(),
-		"drift        : %+7.2f ms   (peak %+7.2f ms)" % [drift_ms, _peak_drift_ms],
-		"haptics      : %s" % ("available" if _haptics != null and _haptics.has_haptics else "unavailable"),
+		"%s          : %5.1f%s" % [tr("drift_fps"), Engine.get_frames_per_second(), tr("drift_fps_target")],
+		"%s        : %-6s  %3d%%" % [tr("drift_phase"), BreathModel.phase_label(phase), int(phase_progress * 100.0)],
+		"%s    : %4.2f" % [tr("drift_amplitude"), amplitude],
+		"%s: %8.3f s" % [tr("drift_clock_frame"), _clock.elapsed()],
+		"%s : %8.3f s" % [tr("drift_clock_wall"), _clock.real_seconds()],
+		"%s        : %+7.2f ms   %s %+7.2f ms)" % [tr("drift_drift"), drift_ms, tr("drift_drift_peak"), _peak_drift_ms],
+		"%s      : %s" % [tr("drift_haptics"), haptic_label],
 	])
