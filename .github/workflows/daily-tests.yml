@@ -72,7 +72,7 @@ jobs:
         run: |
           set -eux
           set -o pipefail
-          godot --headless --path . --script res://tools/validate_hold_graph.gd 2>&1 | tee holdgraph_results.log
+          bash tools/run_hold_graph_tests.sh 2>&1 | tee holdgraph_results.log
 
       - name: Content Linter (exit code gates the job)
         run: |

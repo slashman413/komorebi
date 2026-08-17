@@ -73,7 +73,7 @@ jobs:
       - name: HoldGraph Validator (exit code gates the job)
         run: |
           set -eux
-          godot --headless --path . --script res://tools/validate_hold_graph.gd
+          bash tools/run_hold_graph_tests.sh
 
       - name: Content Linter (exit code gates the job)
         run: |

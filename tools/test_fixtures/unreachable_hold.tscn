@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://src/nodes/climb_hold.gd" type="Script" id=1]
+
+[node name="UnreachableHold" type="Node3D"]
+
+[node name="RestA" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+script = ExtResource(1)
+is_rest_point = true
+connected_holds = [NodePath("../RestB")]
+
+[node name="RestB" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 0)
+script = ExtResource(1)
+is_rest_point = true
+connected_holds = [NodePath("../RestA")]
+
+[node name="RestC" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 48, 0)
+script = ExtResource(1)
+is_rest_point = true
+connected_holds = []
