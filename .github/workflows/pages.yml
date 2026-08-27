@@ -1,12 +1,23 @@
-name: Deploy landing page to GitHub Pages
+name: Deploy landing + playable web demo to GitHub Pages
 
-# Publishes web/ (the JS 4-7-8 breathing-orb landing page) to GitHub Pages.
-# One-time enable required: repo Settings → Pages → Source: "GitHub Actions".
+# Publishes the Komorebi funnel to GitHub Pages:
+#   /            -> web/index.html      (Ko-fi tip CTA + "Play the free demo")
+#   /play/       -> Godot 4.3 HTML5 export of the breathing-climb vertical slice
+#
+# One-time owner action required (the Actions token cannot do it):
+#   repo Settings -> Pages -> Source: "GitHub Actions".
 
 on:
   push:
     branches: ["master", "main"]
-    paths: ["web/**", ".github/workflows/pages.yml"]
+    # Rebuild when the landing, the workflow, the game, or export config changes.
+    paths:
+      - "web/**"
+      - ".github/workflows/pages.yml"
+      - "src/**"
+      - "autoload/**"
+      - "project.godot"
+      - "export_presets.cfg"
   workflow_dispatch:
 
 permissions:
@@ -19,18 +30,82 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build:
+    name: Build web export + stage site
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Provision Godot 4.3 export templates
+        run: |
+          set -eux
+          # Derive the template dir from the installed engine so it can never
+          # drift from the image. godot --headless --version prints e.g.
+          # "4.3.stable.official.77dcf97d8"; the template dir is the first
+          # three dot-separated fields ("4.3.stable"). Godot 4.x reads
+          # templates from export_templates/ (Godot 3.x used templates/).
+          GODOT_FULL="$(godot --headless --version 2>/dev/null || true)"
+          GODOT_TPL="$(printf '%s' "$GODOT_FULL" | cut -d. -f1-3)"
+          [ -n "$GODOT_TPL" ] || { echo "::error::could not determine godot version"; exit 1; }
+          echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
+          DEST="$HOME/.local/share/godot/export_templates"
+          mkdir -p "$DEST"
+          for base in /root/.local/share/godot/export_templates /root/.local/share/godot/templates; do
+            if [ -d "$base/$GODOT_TPL" ]; then
+              cp -r "$base/$GODOT_TPL" "$DEST/" || true
+              break
+            fi
+          done
+          ls -la "$DEST/$GODOT_TPL" | head
+          # The Web preset uses the single-threaded template (no SharedArrayBuffer),
+          # which is what GitHub Pages can serve — it cannot set COOP/COEP headers.
+          test -f "$DEST/$GODOT_TPL/web_nothreads_release.zip" \
+            || { echo "::error::web (nothreads) export template for ${GODOT_TPL} not found"; exit 1; }
+
+      - name: Import project (populates .godot/, compiles scripts)
+        run: |
+          set -eux
+          # --import imports assets/compiles scripts and exits cleanly in 4.x.
+          timeout 180 godot --headless --import 2>&1 | tee import.log
+
+      - name: Export Web (HTML5) build
+        run: |
+          set -eux
+          mkdir -p build/web
+          # --export-release is Godot 4.x syntax. index.html is the entry point.
+          timeout 300 godot --headless --export-release "Web" build/web/index.html
+          ls -la build/web
+
+      - name: Stage Pages site (landing + /play/)
+        run: |
+          set -eux
+          mkdir -p _site/play
+          # Landing page and its assets at the site root.
+          cp -r web/. _site/
+          # Playable Godot web export under /play/.
+          cp -r build/web/. _site/play/
+          # GitHub Pages must not run Jekyll over the Godot output.
+          touch _site/.nojekyll
+          ls -la _site _site/play
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
   deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # One-time owner action: Settings -> Pages -> Source: "GitHub Actions".
+      # (The Actions token cannot create the Pages site on first enablement,
+      # so `enablement: true` is intentionally omitted.)
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: web
       - id: deployment
         uses: actions/deploy-pages@v4

@@ -19,7 +19,7 @@ jobs:
     name: Daily Import + Parse Gate + Tests
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:3.5
+      image: barichello/godot-ci:4.3
     steps:
       - uses: actions/checkout@v4
 
@@ -27,31 +27,29 @@ jobs:
         run: |
           set -eux
           # Derive the template dir from the installed engine (godot
-          # --headless --version -> 3.5.stable.official.991bb6ac7 -> dir
-          # 3.5.stable). The image keeps Godot 3.x templates under templates/
-          # (Godot 4.x: export_templates/).
+          # --headless --version -> 4.3.stable.official.77dcf97d8 -> dir
+          # 4.3.stable). Godot 4.x keeps templates under export_templates/.
           GODOT_FULL="$(godot --headless --version 2>/dev/null || true)"
           GODOT_TPL="$(printf '%s' "$GODOT_FULL" | cut -d. -f1-3)"
           [ -n "$GODOT_TPL" ] || { echo "::error::could not determine godot version"; exit 1; }
           echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
-          mkdir -p "$HOME/.local/share/godot/templates"
-          for base in /root/.local/share/godot/templates /root/.local/share/godot/export_templates; do
+          DEST="$HOME/.local/share/godot/export_templates"
+          mkdir -p "$DEST"
+          for base in /root/.local/share/godot/export_templates /root/.local/share/godot/templates; do
             if [ -d "$base/$GODOT_TPL" ]; then
-              cp -r "$base/$GODOT_TPL" "$HOME/.local/share/godot/templates/" || true
+              cp -r "$base/$GODOT_TPL" "$DEST/" || true
               break
             fi
           done
-          ls -la "$HOME/.local/share/godot/templates/" || true
+          ls -la "$DEST/" || true
 
       - name: Import project (populates .godot/, compiles scripts)
         run: |
           set -eux
           set -o pipefail
-          # Godot 3.5 --import boots the main scene and never exits on its own;
-          # --quit quits after the first frame (imports still run, loaded-script
-          # parse errors still print for the grep backstop). timeout is a hard
-          # backstop so a hang can never zombie a run for the 6h job limit.
-          timeout 120 godot --headless --path . --import --quit 2>&1 | tee import.log
+          # Godot 4.x --import imports assets/compiles scripts and exits cleanly.
+          # timeout is a hard backstop so a hang can never zombie the run.
+          timeout 180 godot --headless --import 2>&1 | tee import.log
 
       - name: Parse gate (log scan backstop)
         run: |

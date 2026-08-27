@@ -10,3 +10,7 @@ export/
 # OS noise
 .DS_Store
 Thumbs.db
+
+# CI / local run logs
+*.log
+*_results.txt
