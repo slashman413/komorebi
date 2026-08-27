@@ -78,10 +78,11 @@
     </div>
 
     <div class="ctas">
-      <a class="cta primary" id="steam" href="#">Wishlist on Steam</a>
-      <a class="cta ghost" href="https://slashman413.itch.io/komorebi">Play the demo on itch.io</a>
+      <a class="cta primary" href="https://ko-fi.com/ytstories0413">Support the game ☕</a>
+      <a class="cta ghost" id="itch" href="https://slashman413.itch.io/komorebi">Play the free demo</a>
+      <a class="cta ghost" href="https://github.com/slashman413/komorebi">Follow dev on GitHub</a>
     </div>
-    <p class="note">The orb above runs the real 4-7-8 rhythm from the game. In the full build it also drives audio and Steam Deck haptics.</p>
+    <p class="note">The orb above runs the real 4-7-8 rhythm from the game. Komorebi is free to play — if it gives you a calmer minute, a coffee keeps development going. A Steam release will follow.</p>
 
     <section class="about">
       <h2>What it is</h2>
@@ -93,7 +94,9 @@
       breath curve, and for Windows and Linux. One authoritative timer drives the visuals,
       audio, and haptics together — so what you see and what you feel never fall out of sync.</p>
       <h2>Follow along</h2>
-      <p>Wishlist on Steam and grab the free demo on itch.io. Development is public on
+      <p>Play the free demo, and if it earns a quiet moment, you can
+      <a href="https://ko-fi.com/ytstories0413">leave a tip on Ko-fi</a> — that directly funds the
+      full build and a Steam release. Development is public on
       <a href="https://github.com/slashman413/komorebi">GitHub</a>.</p>
     </section>
 
@@ -144,14 +147,6 @@
     label.textContent = 'Paused';
   }
   toggle.addEventListener('click', function () { running ? stop() : start(); });
-
-  // Steam CTA: real store link once APPID is minted; falls back to GitHub for now.
-  var STEAM_APPID = ''; // set to the numeric appid after Steamworks setup
-  var steam = document.getElementById('steam');
-  steam.href = STEAM_APPID
-    ? 'https://store.steampowered.com/app/' + STEAM_APPID
-    : 'https://github.com/slashman413/komorebi';
-  if (!STEAM_APPID) { steam.textContent = 'Wishlist on Steam (soon)'; }
 })();
 </script>
 </body>
