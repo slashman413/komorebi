@@ -13,6 +13,7 @@ extends SceneTree
 
 const SaveServiceScript := preload("res://autoload/save_service.gd")
 const BreathModel := preload("res://spike/breath_model.gd")
+const BreathClockScript := preload("res://spike/breath_clock.gd")
 
 var _failures: int = 0
 var _checks: int = 0
@@ -20,6 +21,7 @@ var _checks: int = 0
 func _init() -> void:
 	print("== Komorebi test run ==")
 	_test_breath_model()
+	_test_breath_clock()
 	_test_save_service_roundtrip()
 	_test_save_service_fixture()
 
@@ -71,6 +73,31 @@ func _test_breath_model() -> void:
 	# Monotonic rise across inhale, monotonic fall across exhale.
 	_check(BreathModel.amplitude(1.0) < BreathModel.amplitude(3.0), "inhale amplitude rises")
 	_check(BreathModel.amplitude(12.0) > BreathModel.amplitude(17.0), "exhale amplitude falls")
+
+func _test_breath_clock() -> void:
+	print("[BreathClock]")
+	var clock = BreathClockScript.new()
+	clock._ready()
+	var cycles_emitted: Array = [0]
+	clock.cycle_completed.connect(func(_sec): cycles_emitted[0] += 1)
+
+	# Simulate 1 full cycle
+	# INHALE (4s) -> HOLD (7s) -> EXHALE (8s)
+	# 4 + 7 + 8 = 19
+	clock._process(4.0) # -> HOLD
+	_check(cycles_emitted[0] == 0, "no cycle after inhale")
+	clock._process(7.0) # -> EXHALE
+	_check(cycles_emitted[0] == 0, "no cycle after hold")
+	clock._process(7.9) # almost end of EXHALE
+	_check(cycles_emitted[0] == 0, "no cycle before exhale finishes")
+	clock._process(0.2) # wrap to INHALE
+	_check(cycles_emitted[0] == 1, "emits cycle_completed on wrapping to INHALE")
+	
+	# Simulate another cycle
+	clock._process(4.0) # -> HOLD
+	clock._process(7.0) # -> EXHALE
+	clock._process(8.0) # -> INHALE
+	_check(cycles_emitted[0] == 2, "emits second cycle_completed after 19s")
 
 # ---- SaveService: atomic write + schema versioning --------------------------
 

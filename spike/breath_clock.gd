@@ -16,6 +16,7 @@ extends Node
 
 signal breath_tick(phase, phase_progress, amplitude, cycle_time)
 signal phase_changed(phase)
+signal cycle_completed(cycle_seconds)
 
 var running: bool = true
 
@@ -42,8 +43,11 @@ func _process(delta: float) -> void:
 	var pp: float = BreathModel.phase_progress(cycle_time)
 
 	if phase != _last_phase:
+		var prev_phase: int = _last_phase
 		_last_phase = phase
 		emit_signal("phase_changed", phase)
+		if phase == BreathModel.Phase.INHALE and prev_phase == BreathModel.Phase.EXHALE:
+			emit_signal("cycle_completed", BreathModel.get_cycle_sec())
 
 	emit_signal("breath_tick", phase, pp, amp, cycle_time)
 

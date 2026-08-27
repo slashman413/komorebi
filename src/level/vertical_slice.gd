@@ -3,14 +3,15 @@ extends Node3D
 @onready var ecology_system = $EcologySystem
 @onready var soundscape_system = $SoundscapeSystem
 @onready var audio_director = $AudioDirector
+@onready var climb_system = $ClimbSystem
+@onready var greybox_wall = $GreyboxWall
+
+var ending_canvas: CanvasLayer
 
 func _ready() -> void:
 	print("[VerticalSlice] Level loaded.")
 	
-	# Wire up AudioDirector to EcologySystem
 	audio_director.bind_ecology_system(ecology_system)
-	
-	# Initial tests
 	soundscape_system.start_spirit_puzzle()
 	ecology_system.update_vitality(0.2)
 
@@ -28,6 +29,15 @@ func _ready() -> void:
 		if tel:
 			tel.track_breathing_engaged()
 
+	_setup_ctas()
+	
+	if climb_system and greybox_wall:
+		climb_system.climb_finished.connect(_on_climb_finished)
+		var start_hold = greybox_wall.get_node_or_null("Hold1")
+		if start_hold:
+			climb_system.start_climb(start_hold)
+
+func _setup_ctas() -> void:
 	var cta_canvas = CanvasLayer.new()
 	cta_canvas.layer = 100
 	var cta_box = HBoxContainer.new()
@@ -37,8 +47,6 @@ func _ready() -> void:
 	cta_box.alignment = BoxContainer.ALIGNMENT_END
 
 	var wishlist_btn = Button.new()
-	# Localization keys resolve via the automatic translation system (see
-	# locale_table.csv / [internationalization] in project.godot).
 	wishlist_btn.text = "ui_wishlist"
 	wishlist_btn.pressed.connect(_on_wishlist_pressed)
 
@@ -56,3 +64,32 @@ func _on_wishlist_pressed() -> void:
 
 func _on_itch_pressed() -> void:
 	OS.shell_open("https://slashman413.itch.io/komorebi")
+
+func _on_climb_finished() -> void:
+	if not ending_canvas:
+		ending_canvas = CanvasLayer.new()
+		ending_canvas.layer = 150
+		var color_rect = ColorRect.new()
+		color_rect.color = Color(0, 0, 0, 0.7)
+		color_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+		ending_canvas.add_child(color_rect)
+		
+		var center_container = CenterContainer.new()
+		center_container.set_anchors_preset(Control.PRESET_FULL_RECT)
+		
+		var vbox = VBoxContainer.new()
+		vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+		
+		var end_label = Label.new()
+		end_label.text = "ending_text"
+		end_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		
+		var end_sublabel = Label.new()
+		end_sublabel.text = "ending_subtext"
+		end_sublabel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		
+		vbox.add_child(end_label)
+		vbox.add_child(end_sublabel)
+		center_container.add_child(vbox)
+		ending_canvas.add_child(center_container)
+		add_child(ending_canvas)

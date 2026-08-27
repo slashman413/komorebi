@@ -1,39 +1,92 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=3 format=3]
 
-[ext_resource path="res://src/nodes/climb_hold.gd" type="Script" id=1]
+[ext_resource type="Script" path="res://src/nodes/climb_hold.gd" id="1"]
 
-[sub_resource type="BoxMesh" id=1]
-size = Vector3(10, 10, 1)
+[sub_resource type="BoxMesh" id="1"]
+size = Vector3(10, 30, 1)
 
 [node name="GreyboxWall" type="Node3D"]
 
 [node name="WallMesh" type="MeshInstance3D" parent="."]
-mesh = SubResource(1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
+mesh = SubResource("1")
 
 [node name="Hold1" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, 0.5)
-script = ExtResource(1)
+script = ExtResource("1")
 is_rest_point = true
 connected_holds = [NodePath("../Hold2")]
 
 [node name="Hold2" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0.5)
-script = ExtResource(1)
+script = ExtResource("1")
 connected_holds = [NodePath("../Hold3")]
 
 [node name="Hold3" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
-script = ExtResource(1)
+script = ExtResource("1")
 is_rest_point = true
 connected_holds = [NodePath("../Hold4")]
 
 [node name="Hold4" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0.5)
-script = ExtResource(1)
+script = ExtResource("1")
 connected_holds = [NodePath("../Hold5")]
 
 [node name="Hold5" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0.5)
-script = ExtResource(1)
+script = ExtResource("1")
+connected_holds = [NodePath("../Hold6")]
+
+[node name="Hold6" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0.5)
+script = ExtResource("1")
+is_rest_point = true
+connected_holds = [NodePath("../Hold7")]
+
+[node name="Hold7" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 0.5)
+script = ExtResource("1")
+connected_holds = [NodePath("../Hold8")]
+
+[node name="Hold8" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0.5)
+script = ExtResource("1")
+connected_holds = [NodePath("../Hold9")]
+
+[node name="Hold9" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 0.5)
+script = ExtResource("1")
+connected_holds = [NodePath("../Hold10")]
+
+[node name="Hold10" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14, 0.5)
+script = ExtResource("1")
+is_rest_point = true
+connected_holds = [NodePath("../Hold11")]
+
+[node name="Hold11" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, 0.5)
+script = ExtResource("1")
+connected_holds = [NodePath("../Hold12")]
+
+[node name="Hold12" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18, 0.5)
+script = ExtResource("1")
+connected_holds = [NodePath("../Hold13")]
+
+[node name="Hold13" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 0.5)
+script = ExtResource("1")
+connected_holds = [NodePath("../Hold14")]
+
+[node name="Hold14" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 22, 0.5)
+script = ExtResource("1")
+connected_holds = [NodePath("../Hold15")]
+
+[node name="Hold15" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 0.5)
+script = ExtResource("1")
 is_rest_point = true
 connected_holds = []

@@ -1,23 +1,25 @@
-id,en,zh
-ui_start,Start,开始
-ui_options,Options,选项
-ui_quit,Quit,退出
-level_intro,"Breathe in. Breathe out.","吸气。呼气。"
-ui_wishlist,Wishlist on Steam,加入 Steam 愿望单
-ui_demo,Demo on itch.io,在 itch.io 试玩
-spike_title,KOMOREBI · Breathing Spike,KOMOREBI · 呼吸原型
-phase_inhale,Inhale,吸气
-phase_hold,Hold,屏息
-phase_exhale,Exhale,呼气
-drift_header,KOMOREBI · Breathing Spike (drift overlay — F3 to hide),KOMOREBI · 呼吸原型 (按 F3 隱藏)
-drift_fps,FPS,FPS
-drift_fps_target,  (target 60),  （目標 60）
-drift_phase,phase,階段
-drift_amplitude,amplitude,振幅
-drift_clock_frame,clock (frame),幀時鐘
-drift_clock_wall,clock (wall),牆時鐘
-drift_drift,drift,漂移
-drift_drift_peak,"(peak","（峰值"
-drift_haptics,haptics,觸覺
-drift_haptics_available,available,可用
-drift_haptics_unavailable,unavailable,不可用
+id,en,zh,ja
+ui_start,Start,开始,スタート
+ui_options,Options,选项,オプション
+ui_quit,Quit,退出,終了
+level_intro,Breathe in. Breathe out.,吸气。呼气。,吸って。吐いて。
+ui_wishlist,Wishlist on Steam,加入 Steam 愿望单,Steamでウィッシュリストに追加
+ui_demo,Demo on itch.io,在 itch.io 试玩,itch.ioでデモをプレイ
+spike_title,KOMOREBI · Breathing Spike,KOMOREBI · 呼吸原型,木漏れ日 · 呼吸スパイク
+phase_inhale,Inhale,吸气,吸う
+phase_hold,Hold,屏息,止める
+phase_exhale,Exhale,呼气,吐く
+drift_header,KOMOREBI · Breathing Spike (drift overlay — F3 to hide),KOMOREBI · 呼吸原型 (按 F3 隱藏),木漏れ日 · 呼吸スパイク (F3で非表示)
+drift_fps,FPS,FPS,FPS
+drift_fps_target,  (target 60),  （目標 60）,  (目標 60)
+drift_phase,phase,階段,フェーズ
+drift_amplitude,amplitude,振幅,振幅
+drift_clock_frame,clock (frame),幀時鐘,クロック (フレーム)
+drift_clock_wall,clock (wall),牆時鐘,クロック (ウォール)
+drift_drift,drift,漂移,ドリフト
+drift_drift_peak,(peak,（峰值,(ピーク
+drift_haptics,haptics,觸覺,ハプティクス
+drift_haptics_available,available,可用,利用可能
+drift_haptics_unavailable,unavailable,不可用,利用不可
+ending_text,The peak is reached. Breathe.,已达巅峰。呼吸。,山頂に到達しました。深呼吸して。
+ending_subtext,Thank you for playing the demo.,感谢游玩演示版。,デモをプレイしていただきありがとうございます。
