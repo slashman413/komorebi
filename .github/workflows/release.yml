@@ -1,12 +1,18 @@
 name: Release to itch.io
 
-# On a v* tag, export Linux + Windows and push them to itch.io via butler.
+# On a v* tag, export the Godot 4.3 demo for Linux + Windows + Web and push
+# each to itch.io via butler on its own channel (linux / windows / html).
 #
-# One-time setup by the account owner (see LAUNCH.md):
-#   1. Create the itch.io project page:  slashman413/komorebi
+#   Trigger:   git tag v0.1.0-demo && git push origin v0.1.0-demo
+#              (or run this workflow manually via "Run workflow").
+#
+# One-time setup by the account owner (see OWNER-RUNBOOK / LAUNCH.md):
+#   1. Create the itch.io project page:  slashman413/komorebi (set PWYW).
 #   2. Generate an API key at https://itch.io/user/settings/api-keys
-#   3. Add it as a repo secret named BUTLER_API_KEY
-# Without the secret the job no-ops with a clear message (never fails the tag).
+#   3. Add it as a repo secret named BUTLER_API_KEY.
+# Without the secret every export still runs and uploads as a workflow
+# artifact; only the butler push is skipped, with a clear message. The tag
+# never fails for a missing key.
 
 on:
   push:
@@ -17,76 +23,155 @@ env:
   ITCH_TARGET: "slashman413/komorebi"
 
 jobs:
-  export-and-publish:
-    name: Export + butler push
+  # ---------------------------------------------------------------------------
+  # Desktop: Linux + Windows, matrixed. Mirrors ci.yml's proven export path.
+  # ---------------------------------------------------------------------------
+  desktop:
+    name: Export ${{ matrix.name }} + butler push
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - preset: "Linux"
-            outfile: "komorebi.x86_64"
-            channel: "linux"
-          - preset: "Windows Desktop"
-            outfile: "komorebi.exe"
-            channel: "windows"
+          - name: Linux
+            preset: "Linux"
+            outdir: linux
+            binary: komorebi.x86_64
+            channel: linux
+          - name: Windows
+            preset: "Windows Desktop"
+            outdir: windows
+            binary: komorebi.exe
+            channel: windows
     steps:
       - uses: actions/checkout@v4
 
-      - name: Provision export templates
+      - name: Provision Godot 4.3 export templates
         run: |
           set -eux
-          # Same self-healing provisioning as ci.yml: derive the template dir
-          # from the installed engine (godot --headless --version ->
-          # 3.5.stable.official.991bb6ac7 -> dir 3.5.stable) instead of
-          # hardcoding a version. Godot 3.x keeps templates under templates/;
-          # the image has them under /root, this job's HOME (/github/home)
-          # is different, so copy them into place.
+          # Derive the template dir from the installed engine so it can never
+          # drift from the barichello/godot-ci:4.3 image. Godot 4.x reads
+          # templates from export_templates/ (Godot 3.x used templates/).
           GODOT_FULL="$(godot --headless --version 2>/dev/null || true)"
           GODOT_TPL="$(printf '%s' "$GODOT_FULL" | cut -d. -f1-3)"
           [ -n "$GODOT_TPL" ] || { echo "::error::could not determine godot version"; exit 1; }
           echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
-          mkdir -p "$HOME/.local/share/godot/templates"
-          for base in /root/.local/share/godot/templates /root/.local/share/godot/export_templates; do
+          DEST="$HOME/.local/share/godot/export_templates"
+          mkdir -p "$DEST"
+          for base in /root/.local/share/godot/export_templates /root/.local/share/godot/templates; do
             if [ -d "$base/$GODOT_TPL" ]; then
-              cp -r "$base/$GODOT_TPL" "$HOME/.local/share/godot/templates/" || true
+              cp -r "$base/$GODOT_TPL" "$DEST/" || true
               break
             fi
           done
-          test -d "$HOME/.local/share/godot/templates/$GODOT_TPL" \
+          test -d "$DEST/$GODOT_TPL" \
             || { echo "::error::export templates for ${GODOT_TPL} not found"; exit 1; }
 
       - name: Import project
-        run: godot --headless --editor --quit 2>&1 | tee import.log
+        run: timeout 180 godot --headless --import 2>&1 | tee import.log
 
-      - name: Export ${{ matrix.preset }}
+      - name: Export ${{ matrix.name }}
         env:
           PRESET: ${{ matrix.preset }}
-          OUTFILE: ${{ matrix.outfile }}
+          OUTDIR: ${{ matrix.outdir }}
+          BINARY: ${{ matrix.binary }}
         run: |
           set -eux
-          mkdir -p build/"$PRESET"
-          # Godot 3.x CLI uses `--export`; `--export-release` is Godot 4.x
-          # syntax that 3.x silently ignores (boots main scene -> hangs).
-          timeout 300 godot --headless --path . --export-release "$PRESET" "build/$PRESET/$OUTFILE"
-          ls -la "build/$PRESET"
+          mkdir -p "build/$OUTDIR"
+          timeout 300 godot --headless --export-release "$PRESET" "build/$OUTDIR/$BINARY"
+          ls -la "build/$OUTDIR"
 
-      - name: Publish to itch.io via butler
+      - name: Upload ${{ matrix.name }} artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: komorebi-${{ matrix.outdir }}
+          path: build/${{ matrix.outdir }}
+          if-no-files-found: error
+
+      - name: Publish ${{ matrix.name }} to itch.io via butler
         if: ${{ env.BUTLER_HAS_KEY == 'true' }}
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-          PRESET: ${{ matrix.preset }}
+          OUTDIR: ${{ matrix.outdir }}
           CHANNEL: ${{ matrix.channel }}
         run: |
           set -eux
           VERSION="${GITHUB_REF_NAME#v}"
-          butler push "build/$PRESET" "$ITCH_TARGET:$CHANNEL" --userversion "$VERSION"
+          butler push "build/$OUTDIR" "$ITCH_TARGET:$CHANNEL" --userversion "$VERSION"
 
       - name: No API key — skip publish
         if: ${{ env.BUTLER_HAS_KEY != 'true' }}
         run: |
-          echo "BUTLER_API_KEY secret not set — export succeeded, itch.io publish skipped."
-          echo "Add the secret (see LAUNCH.md) to enable automatic itch.io deploys on v* tags."
+          echo "BUTLER_API_KEY secret not set — ${{ matrix.name }} export succeeded and was"
+          echo "uploaded as a workflow artifact; the itch.io publish was skipped."
+          echo "Add the secret (see OWNER-RUNBOOK) to enable automatic itch.io deploys."
+    env:
+      BUTLER_HAS_KEY: ${{ secrets.BUTLER_API_KEY != '' }}
+
+  # ---------------------------------------------------------------------------
+  # Web: HTML5 (single-threaded / nothreads template). Mirrors pages.yml.
+  # ---------------------------------------------------------------------------
+  web:
+    name: Export Web + butler push
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Provision Godot 4.3 export templates
+        run: |
+          set -eux
+          GODOT_FULL="$(godot --headless --version 2>/dev/null || true)"
+          GODOT_TPL="$(printf '%s' "$GODOT_FULL" | cut -d. -f1-3)"
+          [ -n "$GODOT_TPL" ] || { echo "::error::could not determine godot version"; exit 1; }
+          echo "Engine ${GODOT_FULL} -> templates ${GODOT_TPL}"
+          DEST="$HOME/.local/share/godot/export_templates"
+          mkdir -p "$DEST"
+          for base in /root/.local/share/godot/export_templates /root/.local/share/godot/templates; do
+            if [ -d "$base/$GODOT_TPL" ]; then
+              cp -r "$base/$GODOT_TPL" "$DEST/" || true
+              break
+            fi
+          done
+          # The Web preset uses the single-threaded (nothreads) template so
+          # itch.io / any host without COOP+COEP headers can serve it.
+          test -f "$DEST/$GODOT_TPL/web_nothreads_release.zip" \
+            || { echo "::error::web (nothreads) template for ${GODOT_TPL} not found"; exit 1; }
+
+      - name: Import project
+        run: timeout 180 godot --headless --import 2>&1 | tee import.log
+
+      - name: Export Web (HTML5)
+        run: |
+          set -eux
+          mkdir -p build/web
+          timeout 300 godot --headless --export-release "Web" build/web/index.html
+          ls -la build/web
+
+      - name: Upload Web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: komorebi-web
+          path: build/web
+          if-no-files-found: error
+
+      - name: Publish Web to itch.io via butler
+        if: ${{ env.BUTLER_HAS_KEY == 'true' }}
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          set -eux
+          VERSION="${GITHUB_REF_NAME#v}"
+          butler push build/web "$ITCH_TARGET:html" --userversion "$VERSION"
+
+      - name: No API key — skip publish
+        if: ${{ env.BUTLER_HAS_KEY != 'true' }}
+        run: |
+          echo "BUTLER_API_KEY secret not set — Web export succeeded and was uploaded as a"
+          echo "workflow artifact; the itch.io publish was skipped."
+          echo "Add the secret (see OWNER-RUNBOOK) to enable automatic itch.io deploys."
     env:
       BUTLER_HAS_KEY: ${{ secrets.BUTLER_API_KEY != '' }}
