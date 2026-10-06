@@ -1,0 +1,59 @@
+name: Release smoke test (Linux)
+
+# Boots the Linux desktop export produced by a "Release to itch.io" run under
+# Xvfb and captures screenshots, so a release is only published once the real
+# x86_64 binary is proven to open on the title screen and play.
+#
+#   gh workflow run release-smoke.yml -f run_id=<release.yml run id>
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Run id of the release.yml run whose komorebi-linux artifact to test"
+        required: true
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: komorebi-linux
+          path: linux
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Install Xvfb + Mesa
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 libgl1
+
+      - name: Boot to title screen
+        run: |
+          set -eux
+          chmod +x linux/komorebi.x86_64
+          ls -la linux
+          mkdir -p shots
+          timeout 60 xvfb-run -a -s "-screen 0 1280x720x24" \
+            linux/komorebi.x86_64 --rendering-driver opengl3 -- --title-shot="$PWD/shots/title.png" 2>&1 | tee title.log
+          test -s shots/title.png
+
+      - name: Autoplay climb
+        run: |
+          set -eux
+          timeout 45 xvfb-run -a -s "-screen 0 1280x720x24" \
+            linux/komorebi.x86_64 --rendering-driver opengl3 -- --autoplay --shots="$PWD/shots" 2>&1 | tee autoplay.log || true
+          grep "\[autoplay\] shot" autoplay.log
+          ls shots/shot_*.png
+          ! grep -E "SCRIPT ERROR|Parse Error" title.log autoplay.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-shots
+          path: |
+            shots
+            *.log
