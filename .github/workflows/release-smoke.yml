@@ -46,8 +46,10 @@ jobs:
           set -eux
           timeout 45 xvfb-run -a -s "-screen 0 1280x720x24" \
             linux/komorebi.x86_64 --rendering-driver opengl3 -- --autoplay --shots="$PWD/shots" 2>&1 | tee autoplay.log || true
-          grep "\[autoplay\] shot" autoplay.log
+          # Godot's stdout is block-buffered into the pipe and lost when timeout
+          # kills it, so judge the climb by the screenshots it saved (one per 6s).
           ls shots/shot_*.png
+          test "$(ls shots/shot_*.png | wc -l)" -ge 3
           ! grep -E "SCRIPT ERROR|Parse Error" title.log autoplay.log
 
       - uses: actions/upload-artifact@v4
