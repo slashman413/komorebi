@@ -78,7 +78,7 @@
     </div>
 
     <div class="ctas">
-      <a class="cta primary" href="https://ko-fi.com/ytstories0413">Support the game ☕</a>
+      <a class="cta primary" data-kofi href="https://ko-fi.com/ytstories0413?utm_source=komorebi-landing" target="_blank" rel="noopener">Support Komorebi — pay what you want ☕</a>
       <a class="cta ghost" id="itch" href="play/">Play the free demo</a>
       <a class="cta ghost" id="download" href="https://github.com/slashman413/komorebi/releases/latest">Download (Win / Linux)</a>
       <a class="cta ghost" href="https://github.com/slashman413/komorebi">Follow dev on GitHub</a>
@@ -96,7 +96,7 @@
       audio, and haptics together — so what you see and what you feel never fall out of sync.</p>
       <h2>Follow along</h2>
       <p>Play the free demo, and if it earns a quiet moment, you can
-      <a href="https://ko-fi.com/ytstories0413">leave a tip on Ko-fi</a> — that directly funds the
+      <a data-kofi href="https://ko-fi.com/ytstories0413?utm_source=komorebi-landing" target="_blank" rel="noopener">leave a tip on Ko-fi</a> — that directly funds the
       full build and a Steam release. Development is public on
       <a href="https://github.com/slashman413/komorebi">GitHub</a>.</p>
     </section>
@@ -150,5 +150,6 @@
   toggle.addEventListener('click', function () { running ? stop() : start(); });
 })();
 </script>
+<script src="komorebi-cta.js" defer></script>
 </body>
 </html>
