@@ -4,10 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Komorebi — breathe with the mountain</title>
-<meta name="description" content="A meditative game fusing 4-7-8 guided breathing with contemplative mountain climbing. Breathe in for 4, hold for 7, out for 8." />
-<meta property="og:title" content="Komorebi — breathe with the mountain" />
-<meta property="og:description" content="A meditative game fusing 4-7-8 guided breathing with contemplative mountain climbing." />
+<meta name="description" content="Komorebi is a calm climbing game you play free in your browser: pick your route up a new mountain every run, rest at lantern ledges and breathe 4-7-8 to restore your calm." />
+<meta property="og:title" content="Komorebi — breathe &amp; climb" />
+<meta property="og:description" content="A calm climbing game, free in your browser. Pick your holds, rest at lanterns, breathe 4-7-8, reach the summit." />
 <meta property="og:type" content="website" />
+<meta property="og:url" content="https://slashmantools.us/komorebi/" />
+<meta property="og:image" content="https://slashmantools.us/komorebi/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://slashmantools.us/komorebi/og.png" />
 <style>
   :root {
     --bg0: #0d1b2a; --bg1: #1b2a3a; --ink: #e8eef4; --muted: #9fb3c8;
@@ -59,12 +63,35 @@
   .about p { color: var(--muted); line-height: 1.7; margin-bottom: 14px; }
   .foot { margin-top: 48px; color: var(--muted); font-size: .8rem; }
   a { color: var(--accent); }
+  .hero { display: block; position: relative; margin: 30px auto 6px; border-radius: 18px; overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0,0,0,.45); border: 1px solid var(--line); }
+  .hero img { display: block; width: 100%; height: auto; }
+  .hero .playbtn { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    background: linear-gradient(180deg, var(--accent), #5fb89e); color: #06232a; font-weight: 700;
+    padding: 18px 34px; border-radius: 999px; font-size: 1.25rem; box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    transition: transform .15s; white-space: nowrap; }
+  .hero:hover .playbtn { transform: translate(-50%,-52%) scale(1.04); }
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0 4px; }
+  .shots img { width: 100%; border-radius: 12px; border: 1px solid var(--line); display: block; }
+  .feat { text-align: left; color: var(--muted); line-height: 1.7; padding-left: 20px; margin-bottom: 14px; }
+  .feat b { color: var(--ink); }
 </style>
 </head>
 <body>
   <main class="wrap">
     <h1>Komorebi</h1>
-    <p class="tag">A meditative game where you breathe with the mountain.<br />In for <b>4</b>, hold for <b>7</b>, out for <b>8</b> — the climb answers your breath.</p>
+    <p class="tag">A calm climbing game you play free in your browser.<br />Pick your holds, rest at lantern ledges, breathe in for <b>4</b>, hold for <b>7</b>, out for <b>8</b> — and reach the summit.</p>
+
+    <a class="hero" href="play/" id="hero-play">
+      <img src="shot-breathe.jpg" width="960" height="600" alt="Komorebi gameplay: the climber rests at a lantern ledge while the breathing orb guides a 4-7-8 breath" />
+      <span class="playbtn">▶ Play free in your browser</span>
+    </a>
+    <div class="shots">
+      <img src="shot-climb.jpg" width="960" height="600" loading="lazy" alt="Climbing the Snowfield Ridge at dusk, with sunlight and gems on the side routes" />
+      <img src="shot-summit.jpg" width="960" height="600" loading="lazy" alt="Reaching the summit flag above the sea of clouds" />
+    </div>
+
+    <h2 style="margin-top:44px;font-size:1.3rem">Or just breathe for a minute</h2>
 
     <section class="stage" aria-label="Breathing guide">
       <div class="orb" id="orb"></div>
@@ -79,21 +106,28 @@
 
     <div class="ctas">
       <a class="cta primary" data-kofi href="https://ko-fi.com/ytstories0413?utm_source=komorebi-landing" target="_blank" rel="noopener">Support Komorebi — pay what you want ☕</a>
-      <a class="cta ghost" id="itch" href="play/">Play the free demo</a>
+      <a class="cta ghost" id="itch" href="play/">Play free in your browser</a>
       <a class="cta ghost" id="download" href="https://github.com/slashman413/komorebi/releases/latest">Download (Win / Linux)</a>
       <a class="cta ghost" href="https://github.com/slashman413/komorebi">Follow dev on GitHub</a>
     </div>
-    <p class="note">The orb above runs the real 4-7-8 rhythm from the game. Komorebi is free to play — if it gives you a calmer minute, a coffee keeps development going. A Steam release will follow.</p>
+    <p class="note">The orb above runs the same 4-7-8 rhythm as the lantern ledges in the game. Komorebi is free to play. If it gives you a calmer minute, a coffee keeps development going.</p>
 
     <section class="about">
       <h2>What it is</h2>
-      <p>Komorebi (木漏れ日 — sunlight filtering through leaves) is a slow game. There is a
-      mountain, and there is your breath, and a single clock binds them. You climb not by
-      reflex but by rhythm: each held breath steadies your hands, each exhale finds the next
-      hold. An ecology and a soundscape shift as you settle.</p>
-      <p>Built in Godot 4.3 for the Steam Deck, where the controller pulses gently with the
-      breath curve, and for Windows and Linux. One authoritative timer drives the visuals,
-      audio, and haptics together — so what you see and what you feel never fall out of sync.</p>
+      <p>Komorebi (木漏れ日, sunlight filtering through leaves) is a climbing game about pacing
+      yourself. Every run is a newly generated mountain. Click or tap a glowing hold (or use the
+      arrow keys) to reach for it. Every grip costs a little <b>Calm</b>, and if you run out you slip
+      back to the last lantern you lit.</p>
+      <ul class="feat">
+        <li><b>Lantern ledges</b>: hold to breathe in, keep holding, let go to breathe out. One
+        real 4-7-8 breath restores your calm and grants <b>Focus</b>, which slows the drain.</li>
+        <li><b>Five zones</b>, from Sunlit Foothills to the Sea of Clouds, with the sky moving from
+        morning to a starry dusk as you climb.</li>
+        <li><b>Side routes</b> hide sunlight, gems and hearts. Crumbling holds, bees and falling
+        rocks keep you honest.</li>
+        <li>Mouse, touch, keyboard or gamepad. English, 繁體中文 and 日本語.</li>
+      </ul>
+      <p>Made in Godot 4.3. Art and sound effects by <a href="https://kenney.nl">Kenney</a> (CC0).</p>
       <h2>Follow along</h2>
       <p>Play the free demo, and if it earns a quiet moment, you can
       <a data-kofi href="https://ko-fi.com/ytstories0413?utm_source=komorebi-landing" target="_blank" rel="noopener">leave a tip on Ko-fi</a> — that directly funds the
@@ -101,7 +135,7 @@
       <a href="https://github.com/slashman413/komorebi">GitHub</a>.</p>
     </section>
 
-    <p class="foot">© Komorebi · made by <a href="https://slashman413.itch.io">slashman413</a></p>
+    <p class="foot">Built by <a href="https://github.com/slashman413">@slashman413</a> · <a data-kofi href="https://ko-fi.com/ytstories0413?utm_source=komorebi-landing" target="_blank" rel="noopener">Support on Ko-fi</a></p>
   </main>
 
 <script>

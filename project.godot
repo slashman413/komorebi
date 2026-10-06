@@ -16,11 +16,13 @@ config_version=5
 [application]
 
 config/name="Komorebi"
-config/description="4-7-8 breathing companion. Increment 0 de-risks haptic/audio/visual sync."
-run/main_scene="res://src/level/vertical_slice.tscn"
+config/description="Breathe & climb: a calm climbing game built on 4-7-8 breathing."
+run/main_scene="res://src/game/main.tscn"
 config/icon="res://icon.svg"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 run/max_fps=60
+boot_splash/bg_color=Color(0.051, 0.106, 0.165, 1)
+boot_splash/show_image=false
 
 [autoload]
 
@@ -41,9 +43,13 @@ gdscript/warnings/untyped_declaration=1
 [display]
 
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
+window/stretch/aspect="expand"
 window/size/viewport_width=1280
 window/size/viewport_height=800
+
+[gui]
+
+theme/custom_font="res://assets/fonts/ui_font.tres"
 
 [input_devices]
 
@@ -57,4 +63,4 @@ locale/translations=PackedStringArray("res://src/locale/locale_table.en.translat
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-environment/defaults/default_clear_color=Color(0.086, 0.098, 0.129, 1)
+environment/defaults/default_clear_color=Color(0.56, 0.8, 0.96, 1)

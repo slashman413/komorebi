@@ -14,6 +14,8 @@ enum State { BOOT, SPIKE, PAUSED }
 
 var state = State.BOOT
 var save_data: Dictionary = {}
+## Gameplay sets this false on menus so Esc doesn't freeze the title screen.
+var pause_enabled: bool = true
 
 func _ready() -> void:
 	# The app state machine must keep running while the tree is paused so it can
@@ -39,8 +41,16 @@ func _set_state(new_state) -> void:
 	emit_signal("state_changed", state)
 
 func _on_pause_requested() -> void:
-	_set_state(State.PAUSED if state != State.PAUSED else State.SPIKE)
-	get_tree().paused = state == State.PAUSED
+	if not pause_enabled and state != State.PAUSED:
+		return
+	toggle_pause()
+
+func toggle_pause() -> void:
+	set_paused(state != State.PAUSED)
+
+func set_paused(p: bool) -> void:
+	_set_state(State.PAUSED if p else State.SPIKE)
+	get_tree().paused = p
 
 ## Record a completed breathing session and persist atomically. Called by the
 ## spike; kept here so persistence policy lives in one place.

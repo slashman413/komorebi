@@ -14,6 +14,7 @@ extends SceneTree
 const SaveServiceScript := preload("res://autoload/save_service.gd")
 const BreathModel := preload("res://spike/breath_model.gd")
 const BreathClockScript := preload("res://spike/breath_clock.gd")
+const MountainGenScript := preload("res://src/game/mountain_gen.gd")
 
 var _failures: int = 0
 var _checks: int = 0
@@ -24,6 +25,7 @@ func _init() -> void:
 	_test_breath_clock()
 	_test_save_service_roundtrip()
 	_test_save_service_fixture()
+	_test_mountain_gen()
 
 	print("-----------------------------------")
 	if _failures == 0:
@@ -154,3 +156,42 @@ func _reset_user_save() -> void:
 	for path in [SaveServiceScript.SAVE_PATH, SaveServiceScript.TEMP_PATH]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+# ---- MountainGen (procedural layout) -----------------------------------------
+
+func _test_mountain_gen() -> void:
+	print("[MountainGen]")
+	var all_reachable := true
+	var all_ledged := true
+	var main_hops_ok := true
+	var deterministic := true
+	for seed_value in range(1, 61):
+		var holds: Array = MountainGenScript.generate(seed_value)
+		if not MountainGenScript.summit_reachable(holds):
+			all_reachable = false
+			printerr("    seed %d: summit unreachable" % seed_value)
+		var ledges := 0
+		var prev: Vector2 = holds[0]["pos"]
+		for h in holds:
+			if not h["main"]:
+				continue
+			if h["kind"] == MountainGenScript.Kind.LEDGE:
+				ledges += 1
+			if (h["pos"] as Vector2).distance_to(prev) > MountainGenScript.REACH:
+				main_hops_ok = false
+			prev = h["pos"]
+		if ledges < 5:
+			all_ledged = false
+			printerr("    seed %d: only %d lantern ledges" % [seed_value, ledges])
+		if seed_value <= 5:
+			var again: Array = MountainGenScript.generate(seed_value)
+			if again.size() != holds.size() or again[again.size() - 1]["pos"] != holds[holds.size() - 1]["pos"]:
+				deterministic = false
+	_check(all_reachable, "60 seeds: summit always reachable from the trailhead")
+	_check(main_hops_ok, "60 seeds: every main-path hop is within REACH")
+	_check(all_ledged, "60 seeds: at least 5 lantern ledges per mountain")
+	_check(deterministic, "same seed -> same mountain")
+	var holds0: Array = MountainGenScript.generate(413)
+	_check(holds0[0]["kind"] == MountainGenScript.Kind.START, "first hold is the trailhead")
+	_check(holds0.filter(func(h: Dictionary) -> bool: return h["kind"] == MountainGenScript.Kind.SUMMIT).size() == 1, "exactly one summit")
+

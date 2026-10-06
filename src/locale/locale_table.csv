@@ -23,3 +23,54 @@ drift_haptics_available,available,可用,利用可能
 drift_haptics_unavailable,unavailable,不可用,利用不可
 ending_text,The peak is reached. Breathe.,已达巅峰。呼吸。,山頂に到達しました。深呼吸して。
 ending_subtext,Thank you for playing the demo.,感谢游玩演示版。,デモをプレイしていただきありがとうございます。
+title_sub,木漏れ日 · breathe with the mountain,木漏れ日 · 與山一起呼吸,木漏れ日 · 山と一緒に呼吸する
+howto_1,Click or tap a glowing hold to climb  (or ← ↑ → / A W D),點擊發光的岩點來攀爬（或用 ← ↑ → / A W D）,光る岩をクリック／タップして登ろう（← ↑ → / A W D でも可）
+howto_2,"Every grip drains your Calm. Run out, and you slip back to the last lantern.",每次抓握都會消耗平靜值。耗盡時會滑回上一盞燈籠。,つかまるたびに「落ち着き」が減る。尽きると最後の灯籠まで滑り落ちる。
+howto_3,"At lantern ledges, hold SPACE (or press and hold) to breathe in, keep holding, then let go to breathe out: 4-7-8.",在燈籠平台按住空白鍵（或長按畫面）吸氣、繼續按住屏息、放開吐氣：4-7-8。,灯籠の岩棚でスペース（または長押し）で吸って、押したまま止めて、離して吐く：4-7-8。
+howto_4,"Side routes hide sunlight, gems and hearts. Mind the bees and falling rocks.",岔路藏著陽光、寶石與愛心。小心蜜蜂和落石。,脇道には光・宝石・ハートが隠れている。ハチと落石に注意。
+btn_play,Begin the climb,開始攀登,登り始める
+btn_lang,Language: English,語言：繁體中文,言語：日本語
+btn_sound_on,Sound: On,聲音：開,サウンド：オン
+btn_sound_off,Sound: Off,聲音：關,サウンド：オフ
+btn_resume,Resume,繼續,再開
+btn_restart,New mountain,換一座山,新しい山
+btn_title,Back to title,回到標題,タイトルへ
+btn_again,Climb a new mountain,攀登新的山,新しい山へ
+btn_support,Support on Ko-fi,在 Ko-fi 支持,Ko-fiで応援
+pause_title,Paused,暫停,一時停止
+hud_focus,Focus,專注,集中
+zone_0,Sunlit Foothills,陽光山麓,日だまりの麓
+zone_1,Mossy Crags,苔石峭壁,苔むす岩場
+zone_2,Stone Spire,石之尖塔,石の尖塔
+zone_3,Snowfield Ridge,雪原稜線,雪原の稜線
+zone_4,Sea of Clouds,雲海,雲海
+zone_0_sub,Light through the leaves. Take your time.,陽光穿過樹葉。慢慢來。,葉の間からこぼれる光。ゆっくりでいい。
+zone_1_sub,Some holds crumble. Do not linger on them.,有些岩點會崩落，別久留。,崩れる岩もある。長居は禁物。
+zone_2_sub,Watch the sky: rocks fall here.,注意上方：這裡會落石。,上に注意：落石がある。
+zone_3_sub,The air thins. Breathe deeper.,空氣變稀薄了，深呼吸。,空気が薄い。深く呼吸を。
+zone_4_sub,"Above the clouds, the summit waits.",雲海之上，山頂在等你。,雲の上で山頂が待っている。
+hint_start,Click a glowing hold (or press ↑) to start climbing.,點擊發光的岩點（或按 ↑）開始攀登。,光る岩をクリック（または ↑）で登り始めよう。
+hint_rest,"Rest here. Hold SPACE or press and hold to breathe, or pick a hold to move on.",在這裡休息。按住空白鍵或長按畫面來呼吸，或選擇岩點繼續前進。,ここで休もう。スペースか長押しで呼吸、または岩を選んで先へ。
+hint_low,Calm is low. Find a lantern ledge to rest.,平靜值很低，快找燈籠平台休息。,落ち着きが少ない。灯籠の岩棚で休もう。
+breath_ready,Rest and breathe,休息與呼吸,休んで呼吸
+breath_press,Press and hold SPACE (or the screen) to breathe in,按住空白鍵（或長按畫面）開始吸氣,スペース（または画面）を押し続けて吸う
+breath_in_sub,"Keep holding, fill your lungs slowly",繼續按住，慢慢吸滿,押したまま、ゆっくり吸って
+breath_hold_sub,"Keep holding, stay still",繼續按住，保持不動,押したまま、静かに止めて
+breath_out_sub,"Let go, and breathe out slowly",放開，慢慢吐氣,離して、ゆっくり吐いて
+breath_perfect,Perfect breath,完美的呼吸,完璧な呼吸
+breath_good,Good breath,很好的呼吸,よい呼吸
+breath_ok,Gentle breath,溫和的呼吸,やさしい呼吸
+breath_result,Calm restored · Focus %ds · +%d light,平靜已恢復 · 專注 %d 秒 · 光 +%d,落ち着き回復 · 集中 %d秒 · 光 +%d
+msg_slip,"You slipped. Breathe, and try again.",你滑落了。呼吸，再試一次。,滑り落ちた。呼吸して、もう一度。
+msg_ouch,Ouch!,哎唷！,いたっ！
+msg_crumble,This hold is crumbling!,這個岩點正在崩落！,この岩は崩れそう！
+msg_gem,Gem +5 light,寶石 光 +5,宝石 光 +5
+msg_heart,Heart · calm restored,愛心 · 恢復平靜,ハート · 落ち着き回復
+msg_lantern,Lantern lit · checkpoint,燈籠點亮 · 存檔點,灯籠に火 · チェックポイント
+summit_title,You reached the summit,你登上了山頂,山頂に到達しました
+summit_stats,Time %s · Light %d · Breaths %d · Slips %d,時間 %s · 光 %d · 呼吸 %d · 滑落 %d,タイム %s · 光 %d · 呼吸 %d · 滑落 %d
+summit_best,Best time %s,最佳時間 %s,ベストタイム %s
+summit_new_best,New best time!,新的最佳紀錄！,ベスト更新！
+summit_tip,"Every mountain is new. If Komorebi gave you a calmer minute, a coffee keeps it growing.",每座山都不一樣。如果木漏れ日讓你平靜了一分鐘，一杯咖啡能讓它繼續成長。,山は毎回ちがう。木漏れ日でひと息つけたなら、コーヒー一杯で開発を応援してね。
+title_best,Best time %s · Summits %d,最佳時間 %s · 登頂 %d 次,ベスト %s · 登頂 %d 回
+title_best_alt,Highest so far: %d m,目前最高：%d 公尺,最高到達：%d m

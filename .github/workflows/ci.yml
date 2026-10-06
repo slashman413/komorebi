@@ -90,6 +90,11 @@ jobs:
           set -eux
           godot --headless --path . --script res://tests/localization_probe.gd
 
+      - name: Gameplay Probe (exit code gates the job)
+        run: |
+          set -eux
+          godot --headless --path . --script res://tests/gameplay_probe.gd
+
   # ---------------------------------------------------------------------------
   # Gate 2: export Windows + Linux and upload the binaries as artifacts.
   # ---------------------------------------------------------------------------
