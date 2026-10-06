@@ -49,7 +49,7 @@ window/size/viewport_height=800
 
 [gui]
 
-theme/custom_font="res://assets/fonts/ui_font.tres"
+theme/custom_font="res://assets/fonts/noto_sans_cjk_subset.otf"
 
 [input_devices]
 
