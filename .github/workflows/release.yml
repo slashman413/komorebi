@@ -28,7 +28,7 @@ jobs:
   # ---------------------------------------------------------------------------
   desktop:
     name: Export ${{ matrix.name }} + butler push
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: barichello/godot-ci:4.3
     strategy:
@@ -115,7 +115,7 @@ jobs:
   # ---------------------------------------------------------------------------
   web:
     name: Export Web + butler push
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: barichello/godot-ci:4.3
     steps:

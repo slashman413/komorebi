@@ -17,7 +17,7 @@ defaults:
 jobs:
   daily-test-run:
     name: Daily Import + Parse Gate + Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: barichello/godot-ci:4.3
     steps:
