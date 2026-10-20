@@ -84,6 +84,7 @@ var _autoplay: bool = false
 var _auto_t: float = 0.0
 var _auto_breathed: Dictionary = {}
 var _auto_shot_t: float = 0.0
+var _auto_shot_interval: float = 6.0
 var _auto_shot_n: int = 0
 var _auto_shot_dir: String = ""
 var _title_shot: String = ""
@@ -176,6 +177,9 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots="):
 			_auto_shot_dir = a.substr(8)
+			DirAccess.make_dir_recursive_absolute(_auto_shot_dir)
+		elif a.begins_with("--shot-interval="):
+			_auto_shot_interval = maxf(0.01, a.substr(16).to_float())
 		elif a.begins_with("--title-shot="):
 			_title_shot = a.substr(13)
 	_build_mountain(413 if _autoplay else randi())
@@ -798,7 +802,7 @@ func _set_weather(zone: int) -> void:
 func _autopilot(delta: float) -> void:
 	_auto_t += delta
 	_auto_shot_t += delta
-	if _auto_shot_t >= 6.0 and _auto_shot_dir != "":
+	if _auto_shot_t >= _auto_shot_interval and _auto_shot_dir != "":
 		_auto_shot_t = 0.0
 		_auto_shot_n += 1
 		var img: Image = get_viewport().get_texture().get_image()

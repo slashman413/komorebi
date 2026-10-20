@@ -49,7 +49,7 @@ zone_1_sub,Some holds crumble. Do not linger on them.,有些岩點會崩落，�
 zone_2_sub,Watch the sky: rocks fall here.,注意上方：這裡會落石。,上に注意：落石がある。
 zone_3_sub,The air thins. Breathe deeper.,空氣變稀薄了，深呼吸。,空気が薄い。深く呼吸を。
 zone_4_sub,"Above the clouds, the summit waits.",雲海之上，山頂在等你。,雲の上で山頂が待っている。
-hint_start,Click a glowing hold (or press ↑) to start climbing.,點擊發光的岩點（或按 ↑）開始攀登。,光る岩をクリック（または ↑）で登り始めよう。
+hint_start,"Click or tap a glowing hold (or press ↑ / W) to start climbing.","點擊或輕觸發光的岩點（或按 ↑ / W）開始攀登。","光る岩をクリック／タップ（または ↑ / W）で登り始めよう。"
 hint_rest,"Rest here. Hold SPACE or press and hold to breathe, or pick a hold to move on.",在這裡休息。按住空白鍵或長按畫面來呼吸，或選擇岩點繼續前進。,ここで休もう。スペースか長押しで呼吸、または岩を選んで先へ。
 hint_low,Calm is low. Find a lantern ledge to rest.,平靜值很低，快找燈籠平台休息。,落ち着きが少ない。灯籠の岩棚で休もう。
 breath_ready,Rest and breathe,休息與呼吸,休んで呼吸

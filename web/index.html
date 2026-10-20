@@ -49,7 +49,7 @@
     transition: border-color .2s, background .2s;
   }
   button.play:hover { border-color: var(--accent); background: rgba(127,209,185,.08); }
-  .ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin: 40px 0 10px; }
+  .ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin: 36px 0 10px; }
   .cta {
     text-decoration: none; padding: 14px 26px; border-radius: 12px; font-weight: 600;
     border: 1px solid var(--line); color: var(--ink); transition: transform .15s, border-color .2s;
@@ -75,6 +75,49 @@
   .shots img { width: 100%; border-radius: 12px; border: 1px solid var(--line); display: block; }
   .feat { text-align: left; color: var(--muted); line-height: 1.7; padding-left: 20px; margin-bottom: 14px; }
   .feat b { color: var(--ink); }
+
+  /* 30-sec onboarding */
+  .onboarding { margin: 44px 0 16px; text-align: left; }
+  .onboarding h2 { font-size: 1.35rem; font-weight: 700; text-align: center; margin-bottom: 20px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+  .step-card {
+    background: rgba(255, 255, 255, .03); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px 18px; position: relative; transition: border-color .2s, transform .15s;
+  }
+  .step-card:hover { border-color: rgba(127, 209, 185, .35); transform: translateY(-2px); }
+  .step-num {
+    position: absolute; top: 14px; right: 16px; font-size: .8rem; font-weight: 700;
+    color: var(--accent); background: rgba(127, 209, 185, .12); width: 24px; height: 24px;
+    border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(127, 209, 185, .25);
+  }
+  .step-icon { font-size: 1.8rem; margin-bottom: 12px; }
+  .step-card h3 { font-size: 1.05rem; margin-bottom: 8px; color: var(--ink); }
+  .step-card p { font-size: .88rem; color: var(--muted); line-height: 1.55; }
+  kbd {
+    display: inline-block; padding: 1px 6px; font-size: .78rem; font-family: inherit;
+    background: rgba(255,255,255,.08); border: 1px solid var(--line); border-radius: 4px;
+    color: var(--ink);
+  }
+
+  /* Verifiable social-proof badge strip */
+  .badges {
+    display: flex; gap: 10px; justify-content: center; align-items: center;
+    flex-wrap: wrap; margin: 18px 0 8px;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255, 255, 255, .04); border: 1px solid var(--line);
+    padding: 6px 14px; border-radius: 999px; font-size: .84rem; color: var(--muted);
+    text-decoration: none; transition: border-color .2s, background .2s, color .2s;
+  }
+  .badge:hover { border-color: var(--accent); color: var(--ink); background: rgba(127, 209, 185, .06); }
+  .badge.static:hover { border-color: var(--line); color: var(--muted); background: rgba(255, 255, 255, .04); }
+  .badge-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 6px var(--accent); display: inline-block;
+  }
+  .badge-icon { font-size: .95rem; }
+  .badge-num { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -82,14 +125,39 @@
     <h1>Komorebi</h1>
     <p class="tag">A calm climbing game you play free in your browser.<br />Pick your holds, rest at lantern ledges, breathe in for <b>4</b>, hold for <b>7</b>, out for <b>8</b> — and reach the summit.</p>
 
-    <a class="hero" href="play/" id="hero-play">
-      <img src="shot-breathe.jpg" width="960" height="600" alt="Komorebi gameplay: the climber rests at a lantern ledge while the breathing orb guides a 4-7-8 breath" />
+    <a class="hero" href="play/" id="hero-play" aria-label="Play Komorebi demo free in your browser">
+      <img src="gameplay.gif" width="960" height="600" loading="lazy" alt="Komorebi live gameplay: climber leaping between glowing holds and ascending the procedural mountain" />
       <span class="playbtn">▶ Play free in your browser</span>
     </a>
     <div class="shots">
-      <img src="shot-climb.jpg" width="960" height="600" loading="lazy" alt="Climbing the Snowfield Ridge at dusk, with sunlight and gems on the side routes" />
+      <img src="shot-breathe.jpg" width="960" height="600" loading="lazy" alt="Komorebi gameplay: resting at a lantern ledge while the breathing orb guides a 4-7-8 breath" />
       <img src="shot-summit.jpg" width="960" height="600" loading="lazy" alt="Reaching the summit flag above the sea of clouds" />
     </div>
+
+    <!-- 30-Second Onboarding -->
+    <section class="onboarding" aria-label="How to play in 30 seconds">
+      <h2>How to play in 30 seconds</h2>
+      <div class="steps">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-icon">🧗</div>
+          <h3>Pick a glowing hold</h3>
+          <p>Click or tap any highlighted rock hold, or press <kbd>↑</kbd> / <kbd>W</kbd> to reach up. Every leap spends a little Calm.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-icon">🏮</div>
+          <h3>Rest at a lantern to breathe</h3>
+          <p>Reach a lantern ledge to stop calm drain. Hold <kbd>SPACE</kbd> or touch &amp; hold to breathe 4-7-8, restore calm, and gain Focus.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-icon">🚩</div>
+          <h3>Reach the summit</h3>
+          <p>Gain Focus to slow stamina drain, dodge falling rocks and crumbly holds, and ascend through 5 procedurally generated zones to the peak.</p>
+        </div>
+      </div>
+    </section>
 
     <h2 style="margin-top:44px;font-size:1.3rem">Or just breathe for a minute</h2>
 
@@ -110,6 +178,23 @@
       <a class="cta ghost" id="download" href="https://github.com/slashman413/komorebi/releases/latest">Download (Win / Linux)</a>
       <a class="cta ghost" href="https://github.com/slashman413/komorebi">Follow dev on GitHub</a>
     </div>
+
+    <!-- Verifiable Social-Proof Badge Strip -->
+    <div class="badges" id="social-proof" aria-label="Verifiable community statistics">
+      <a class="badge" href="https://api.slashmantools.us/stats?s=komorebi" target="_blank" rel="noopener" title="Verifiable public telemetry: play and landing page visits">
+        <span class="badge-dot"></span>
+        <span id="stat-visits"><span class="badge-num">—</span> people visited</span>
+      </a>
+      <a class="badge" href="https://github.com/slashman413/komorebi/releases" target="_blank" rel="noopener" title="Verifiable GitHub Releases public download count">
+        <span class="badge-icon">📦</span>
+        <span id="stat-downloads"><span class="badge-num">—</span> downloads</span>
+      </a>
+      <div class="badge static">
+        <span class="badge-icon">🌿</span>
+        <span>Free &amp; Open Source</span>
+      </div>
+    </div>
+
     <p class="note">The orb above runs the same 4-7-8 rhythm as the lantern ledges in the game. Komorebi is free to play. If it gives you a calmer minute, a coffee keeps development going.</p>
 
     <section class="about">
@@ -182,6 +267,55 @@
     label.textContent = 'Paused';
   }
   toggle.addEventListener('click', function () { running ? stop() : start(); });
+})();
+
+// Real-count verifiable social-proof telemetry
+(function () {
+  var visitsEl = document.getElementById('stat-visits');
+  var downloadsEl = document.getElementById('stat-downloads');
+
+  // (a) Total play/landing views fetched client-side from api.slashmantools.us/stats?s=komorebi
+  fetch('https://api.slashmantools.us/stats?s=komorebi')
+    .then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function (data) {
+      if (data && data.totals) {
+        var pv = Number(data.totals.play_view) || 0;
+        var lv = Number(data.totals.landing_view) || 0;
+        var total = pv + lv;
+        if (visitsEl) {
+          visitsEl.innerHTML = '<span class="badge-num">' + total.toLocaleString() + '</span> people visited';
+        }
+      }
+    })
+    .catch(function () {
+      if (visitsEl) visitsEl.innerHTML = '<span>Telemetry live</span>';
+    });
+
+  // (b) GitHub release download count for slashman413/komorebi
+  fetch('https://api.github.com/repos/slashman413/komorebi/releases')
+    .then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function (releases) {
+      if (Array.isArray(releases)) {
+        var totalDownloads = releases.reduce(function (sum, r) {
+          var assetSum = (r.assets || []).reduce(function (aSum, asset) {
+            return aSum + (Number(asset.download_count) || 0);
+          }, 0);
+          return sum + assetSum;
+        }, 0);
+        if (downloadsEl) {
+          downloadsEl.innerHTML = '<span class="badge-num">' + totalDownloads.toLocaleString() + '</span> downloads';
+        }
+      }
+    })
+    .catch(function () {
+      if (downloadsEl) downloadsEl.innerHTML = '<span>Releases on GitHub</span>';
+    });
 })();
 </script>
 <script src="komorebi-cta.js" defer></script>
