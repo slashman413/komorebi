@@ -183,7 +183,7 @@
     <div class="badges" id="social-proof" aria-label="Verifiable community statistics">
       <a class="badge" href="https://api.slashmantools.us/stats?s=komorebi" target="_blank" rel="noopener" title="Verifiable public telemetry: play and landing page visits">
         <span class="badge-dot"></span>
-        <span id="stat-visits"><span class="badge-num">—</span> people visited</span>
+        <span id="stat-visits"><span class="badge-num">—</span> visits</span>
       </a>
       <a class="badge" href="https://github.com/slashman413/komorebi/releases" target="_blank" rel="noopener" title="Verifiable GitHub Releases public download count">
         <span class="badge-icon">📦</span>
@@ -286,7 +286,7 @@
         var lv = Number(data.totals.landing_view) || 0;
         var total = pv + lv;
         if (visitsEl) {
-          visitsEl.innerHTML = '<span class="badge-num">' + total.toLocaleString() + '</span> people visited';
+          visitsEl.innerHTML = '<span class="badge-num">' + total.toLocaleString() + '</span> visits';
         }
       }
     })
