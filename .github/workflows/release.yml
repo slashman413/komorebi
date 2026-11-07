@@ -22,6 +22,9 @@ on:
 env:
   ITCH_TARGET: "slashman413/komorebi"
 
+permissions:
+  contents: write
+
 jobs:
   # ---------------------------------------------------------------------------
   # Desktop: Linux + Windows, matrixed. Mirrors ci.yml's proven export path.

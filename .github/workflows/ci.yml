@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   # ---------------------------------------------------------------------------
   # Gate 1: import the project, prove every script parses, run headless tests.
